@@ -108,16 +108,28 @@ Obwohl die UI-Konfiguration empfohlen wird, kann die Karte auch manuell über de
 
 ### Optionen
 
-| name                  | typ      | required   | description                                                                                                 | standard                                 |
-| --------------------- | -------- | ---------- | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
-| `type`                | `string` | Yes        | `custom:bms-battery-cells-card`                                                                             |                                          |
-| `entity`              | `string` | Yes        | Die Entität des BMS (oder Liste der Zell-Sensoren).                                  		                  |                                          |
-| `title`   		   	| `string` | No         | Titel der Karte. 										                                                      | 										                     |
-| `min_voltage`         | `number` | No         | Minimale Zellspannung für die Skala (z.B. 2.5V). 									                          | `2.5`                 		        			 |
-| `max_voltage`         | `number` | No         | Maximale Zellspannung für die Skala (z.B. 3.65V). 								                          | `3.65`                                   |
-| `show_values`         | `boolean`| No         | Zeige die exakten Spannungswerte als Text. 										                          | `true`                                   |
-| `show_min_max`	    | `boolean`| No         | Markiere die Zelle mit der niedrigsten/höchsten Spannung.							                  		  | `true`                		        			 |
-| `columns` 		    | `number` | No         | Anzahl der Spalten für die Zellen-Anzeige.                                                				  | `4`               			          			 |
+| name | typ | erforderlich | Beschreibung | Standard |
+| ---- | --- | ------------ | ------------ | -------- |
+| `type` | `string` | Ja | Kartentyp. Muss `custom:bms-battery-cells-card` sein. | |
+| `title` | `string` | Nein | Titel, der oben in der Karte angezeigt wird. | `"Batterie Zellen"` |
+| `cells` | `list` | Ja | Liste der Zellen (jeweils mit Entität und optionalem Namen). | 4 Beispiel-Zellen |
+| `cells[].entity` | `string` | Ja | Sensor-Entität der Zellspannung. | |
+| `cells[].name` | `string` | Nein | Anzeigename der Zelle. | Zell-Index |
+| `show_legend` | `boolean` | Nein | Zeigt die Spannungs-Skala (Y-Achse) auf der linken Seite an. | `true` |
+| `container_padding` | `number` | Nein | Innenabstand des Karten-Containers in Pixeln. | `16` |
+| `card_height` | `number` | Nein | Feste Höhe der Karte in Pixeln. | `380` |
+| `cell_gap` | `number` | Nein | Abstand zwischen einzelnen Zellen in Pixeln. | `4` |
+| `show_values` | `boolean` | Nein | Zeigt die exakten Zellspannungen als Text an. | `true` |
+| `show_values_on_top` | `boolean` | Nein | Zeigt Statistikwerte oberhalb der Icons an. | `false` |
+| `enable_animations` | `boolean` | Nein | Aktiviert Lade- und Entlade-Animationen. | `true` |
+| `min_voltage` | `number` | Nein | Minimale Zellspannung für die Skalierung. | `2.60` |
+| `max_voltage` | `number` | Nein | Maximale Zellspannung für die Skalierung. | `3.65` |
+| `show_min_max` | `boolean` | Nein | Markiert die Zellen mit minimaler und maximaler Spannung. | `true` |
+| `show_average` | `boolean` | Nein | Zeigt die durchschnittliche Zellspannung in den Statistiken an. | `false` |
+| `soc_entity` | `string` | Nein | Sensor-Entität für den Ladezustand (SoC). | |
+| `watt_entity` | `string` | Nein | Leistungs-Sensor (positiv = Laden, negativ = Entladen). | |
+| `cell_diff_sensor` | `string` | Nein | Sensor für die Zellspannungs-Abweichung (mV). | |
+| `temp_entity` | `string` | Nein | Sensor-Entität für die Batterietemperatur. | |
 
 
 ### Beispielkonfiguration
@@ -139,48 +151,102 @@ min_voltage: 2.8
 max_voltage: 3.6
 show_values: true
 show_min_max: true
-columns: 8
+enable_animations: true
+columns: full
 ```
 
 ### CSS Elements
 
-| Selector            | Description                                                                 |
-| ------------------- | --------------------------------------------------------------------------- |
-| `ha-card`           | Der gesamte Karten-Container.                                               |
-| `.card-header`      | Der Titel der Karte.                                                        |
-| `.cells-container`  | Der Container, der alle Zellen umschließt.                                  |
-| `.cell-item`        | Eine einzelne Batteriezelle.                                                |
-| `.cell-voltage`     | Der Text der Spannung.                                                      |
-| `.cell-bar`         | Der visuelle Balken/Hintergrund der Zelle.                                  |
-| `.min-cell`         | Spezifische Klasse für die Zelle mit der niedrigsten Spannung.              |
-| `.max-cell`         | Spezifische Klasse für die Zelle mit der höchsten Spannung.                 |
+| Selector | Description |
+| :--- | :--- |
+| `.header` | Kopfbereich der Karte. |
+| `.card-header` | Header mit Titel und Statistiken. |
+| `.title` | Karten-Titel. |
+| `.stats` | Container für Statistikwerte. |
+| `.stat-item` | Einzelner Statistikblock. |
+| `.stat-label` | Beschriftung der Statistik. |
+| `.stat-value-row` | Zeile mit Icon und Wert. |
+| `.vertical-layout` | Vertikale Anordnung von Icon/Wert. |
+| `.main-container` | Hauptcontainer der Zellen. |
+| `.cells-container` | Container für alle Zell-Elemente. |
+| `.legend-col` | Spannungs-Skala (Y-Achse). |
+| `.cell-wrapper` | Wrapper einer einzelnen Zelle. |
+| `.cell-item` | Einzelne Batteriezelle. |
+| `.min-cell` | Markierung der Zelle mit Minimalspannung. |
+| `.max-cell` | Markierung der Zelle mit Maximalspannung. |
+| `.custom-tooltip` | Tooltip bei Klick / Hover. |
+| `.cell-track-bg` | Hintergrund mit Farbverlauf. |
+| `.cell-bar` | Spannungs-Balken. |
+| `.is-charging` | Lade-Animation aktiv. |
+| `.is-discharging` | Entlade-Animation aktiv. |
+| `.charging-overlay` | Animiertes Overlay. |
+| `.cell-info-layer` | Overlay für Labels. |
+| `.cell-name-wrap` | Container für Zellnamen. |
+| `.cell-name-badge` | Badge mit Zellnamen. |
+| `.cell-val-wrap` | Container für Spannungswert. |
+| `.cell-val-badge` | Spannungs-Anzeige. |
+| `.cell-voltage` | Kennzeichnung Spannungswert. |
+| `ha-card` | Home Assistant Kartencontainer. |
+| `ha-icon` | Icons in Statistikbereich. |
 
 
-Schriftgröße und Farbe der Spannungen ändern  
-Macht den Text der Spannungswerte größer und fett.
+Header & Titel anpassen 
 ```yaml
 type: custom:bms-battery-cells-card
 entity: sensor.bms_cells
 card_mod:
   style: |
-    .cell-voltage {
-      font-size: 16px;
-      font-weight: bold;
-      color: white;
+    .title {
+      font-size: 1.6rem;
+      font-weight: 600;
+      color: #00e676;
+    }
+    .header.card-header {
+      border-bottom: 1px solid rgba(0,224,118,0.3);
     }
 ```
 
 Min-/Max-Zellen hervorheben  
-Fügt der Zelle mit der höchsten Spannung einen roten Rahmen und der Zelle mit der niedrigsten Spannung einen blauen Rahmen hinzu.
 ```yaml
 type: custom:bms-battery-cells-card
 entity: sensor.bms_cells
 card_mod:
   style: |
-    .max-cell {
-      border: 2px solid red;
+    .cell-wrapper.min-cell {
+      border: 2px solid #2196f3;
+      box-shadow: 0 0 12px rgba(33,150,243,0.8) inset;
     }
-    .min-cell {
-      border: 2px solid blue;
+
+    .cell-wrapper.max-cell {
+      border: 2px solid #f44336;
+      box-shadow: 0 0 12px rgba(244,67,54,0.8) inset;
+    }
+```
+
+Zellnamen dezenter darstellen 
+```yaml
+type: custom:bms-battery-cells-card
+entity: sensor.bms_cells
+card_mod:
+  style: |
+    .cell-name-badge {
+      background: rgba(255,255,255,0.08);
+      color: #e0e0e0;
+      font-weight: 500;
+      letter-spacing: 0.4px;
+    }
+```
+
+Tooltip Design anpassen (Touch, Hover) 
+```yaml
+type: custom:bms-battery-cells-card
+entity: sensor.bms_cells
+card_mod:
+  style: |
+    .cell-name-badge {
+      background: rgba(255,255,255,0.08);
+      color: #e0e0e0;
+      font-weight: 500;
+      letter-spacing: 0.4px;
     }
 ```

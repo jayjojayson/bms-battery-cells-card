@@ -107,17 +107,28 @@ Obwohl die UI-Konfiguration empfohlen wird, kann die Karte auch manuell über de
 
 ### Optionen
 
-| name                  | typ      | required   | description                                                                                                 | standard                                 |
-| --------------------- | -------- | ---------- | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
-| `type`                | `string` | Yes        | `custom:bms-battery-cells-card`                                                                             |                                          |
-| `entity`              | `string` | Yes        | The BMS entity (or list of cell sensors).                                  		             		      |                                          |
-| `title`   		   	| `string` | No         | TCard title. 										                                                   		  | 										                     |
-| `min_voltage`         | `number` | No         | Minimum cell voltage for the scale (e.g. 2.5V).									                          | `2.5`                 		        			 |
-| `max_voltage`         | `number` | No         | Maximum cell voltage for the scale (e.g. 3.65V). 								                    	      | `3.65`                                   |
-| `show_values`         | `boolean`| No         | Show the exact voltage values as text. 										                   		      | `true`                                   |
-| `show_min_max`	    | `boolean`| No         | Highlight the cell with the lowest/highest voltage.						                  				  | `true`                		        			 |
-| `columns` 		    | `number` | No         | Number of columns for the cell display.                                                					  | `4`               			          			 |
-
+| name | type | required | description | default |
+| ---- | ---- | -------- | ----------- | ------- |
+| `type` | `string` | Yes | Card type definition. Must be `custom:bms-battery-cells-card`. | |
+| `title` | `string` | No | Title displayed at the top of the card. | `"Batterie Zellen"` |
+| `cells` | `list` | Yes | List of cell definitions (entity + name). | 4 example cells |
+| `cells[].entity` | `string` | Yes | Sensor entity representing the cell voltage. | |
+| `cells[].name` | `string` | No | Display name of the cell. | Cell index |
+| `show_legend` | `boolean` | No | Show voltage scale (Y-axis) on the left side. | `true` |
+| `container_padding` | `number` | No | Inner padding of the card container (px). | `16` |
+| `card_height` | `number` | No | Fixed height of the card in pixels. | `380` |
+| `cell_gap` | `number` | No | Gap between individual cells (px). | `4` |
+| `show_values` | `boolean` | No | Display voltage values inside each cell. | `true` |
+| `show_values_on_top` | `boolean` | No | Display statistic values above icons instead of inline. | `false` |
+| `enable_animations` | `boolean` | No | Enable charging/discharging animations. | `true` |
+| `min_voltage` | `number` | No | Minimum cell voltage for scaling. | `2.60` |
+| `max_voltage` | `number` | No | Maximum cell voltage for scaling. | `3.65` |
+| `show_min_max` | `boolean` | No | Highlight the cells with minimum and maximum voltage. | `true` |
+| `show_average` | `boolean` | No | Display average cell voltage in statistics. | `false` |
+| `soc_entity` | `string` | No | State of Charge (SoC) sensor entity. | |
+| `watt_entity` | `string` | No | Power sensor entity (positive = charging, negative = discharging). | |
+| `cell_diff_sensor` | `string` | No | Cell voltage drift sensor (mV). | |
+| `temp_entity` | `string` | No | Battery temperature sensor entity. | |
 
 ### Example configuration
 
@@ -138,48 +149,102 @@ min_voltage: 2.8
 max_voltage: 3.6
 show_values: true
 show_min_max: true
-columns: 8
+enable_animations: true
+columns: full
 ```
 
 ### CSS Elements
 
-| Selector            | Description                                                                 |
-| ------------------- | --------------------------------------------------------------------------- |
-| `ha-card`           | The entire card container.                                                  |
-| `.card-header`      | The title of the card.                                                      |
-| `.cells-container`  | The container wrapping all cells.                                           |
-| `.cell-item`        | A single battery cell.                                                      |
-| `.cell-voltage`     | The voltage text.                                                           |
-| `.cell-bar`         | The visual bar/background of the cell.                                      |
-| `.min-cell`         | Specific class for the cell with the lowest voltage.                        |
-| `.max-cell`         | Specific class for the cell with the highest voltage.                       |
+| Selector | Description |
+| :--- | :--- |
+| `.header` | Card header area. |
+| `.card-header` | Header containing the title and statistics. |
+| `.title` | Card title. |
+| `.stats` | Container for statistic values. |
+| `.stat-item` | Individual statistic block. |
+| `.stat-label` | Label of a statistic value. |
+| `.stat-value-row` | Row containing icon and value. |
+| `.vertical-layout` | Vertical layout for icon/value. |
+| `.main-container` | Main container for the cells. |
+| `.cells-container` | Container holding all cell elements. |
+| `.legend-col` | Voltage scale (Y-axis). |
+| `.cell-wrapper` | Wrapper for a single cell. |
+| `.cell-item` | Individual battery cell. |
+| `.min-cell` | Highlights the cell with the lowest voltage. |
+| `.max-cell` | Highlights the cell with the highest voltage. |
+| `.custom-tooltip` | Tooltip shown on click / hover. |
+| `.cell-track-bg` | Cell background with gradient. |
+| `.cell-bar` | Voltage bar of the cell. |
+| `.is-charging` | Charging animation active. |
+| `.is-discharging` | Discharging animation active. |
+| `.charging-overlay` | Animated overlay layer. |
+| `.cell-info-layer` | Overlay layer for labels. |
+| `.cell-name-wrap` | Container for the cell name. |
+| `.cell-name-badge` | Badge displaying the cell name. |
+| `.cell-val-wrap` | Container for the voltage value. |
+| `.cell-val-badge` | Voltage value display. |
+| `.cell-voltage` | Voltage value modifier. |
+| `ha-card` | Home Assistant card container. |
+| `ha-icon` | Icons used in the statistics section. |
 
 
-Change font size and color of voltages  
-Makes the voltage value text larger and bold.
+Header & Titel anpassen 
 ```yaml
 type: custom:bms-battery-cells-card
 entity: sensor.bms_cells
 card_mod:
   style: |
-    .cell-voltage {
-      font-size: 16px;
-      font-weight: bold;
-      color: white;
+    .title {
+      font-size: 1.6rem;
+      font-weight: 600;
+      color: #00e676;
+    }
+    .header.card-header {
+      border-bottom: 1px solid rgba(0,224,118,0.3);
     }
 ```
 
-Highlight Min/Max Cells  
-Adds a red border to the cell with the highest voltage and a blue border to the one with the lowest.
+Min-/Max-Zellen hervorheben  
 ```yaml
 type: custom:bms-battery-cells-card
 entity: sensor.bms_cells
 card_mod:
   style: |
-    .max-cell {
-      border: 2px solid red;
+    .cell-wrapper.min-cell {
+      border: 2px solid #2196f3;
+      box-shadow: 0 0 12px rgba(33,150,243,0.8) inset;
     }
-    .min-cell {
-      border: 2px solid blue;
+
+    .cell-wrapper.max-cell {
+      border: 2px solid #f44336;
+      box-shadow: 0 0 12px rgba(244,67,54,0.8) inset;
+    }
+```
+
+Zellnamen dezenter darstellen 
+```yaml
+type: custom:bms-battery-cells-card
+entity: sensor.bms_cells
+card_mod:
+  style: |
+    .cell-name-badge {
+      background: rgba(255,255,255,0.08);
+      color: #e0e0e0;
+      font-weight: 500;
+      letter-spacing: 0.4px;
+    }
+```
+
+Tooltip Design anpassen (Touch, Hover) 
+```yaml
+type: custom:bms-battery-cells-card
+entity: sensor.bms_cells
+card_mod:
+  style: |
+    .cell-name-badge {
+      background: rgba(255,255,255,0.08);
+      color: #e0e0e0;
+      font-weight: 500;
+      letter-spacing: 0.4px;
     }
 ```
