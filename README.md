@@ -147,15 +147,30 @@ Erweitertes Beispiel:
 
 ```yaml
 type: custom:bms-battery-cells-card
-entity: sensor.bms_master_cells
-title: DIY LiFePO4
-min_voltage: 2.8
-max_voltage: 3.6
-show_values: true
-show_min_max: true
+cells:
+  - name: "1"
+    entity: sensor.vrm_maximum_cell_voltage_batt_1
+  - name: "2"
+    entity: sensor.vrm_minimum_cell_voltage_batt_1
+  - name: "3"
+    entity: sensor.vrm_maximum_cell_voltage_batt_2
+  - name: "4"
+    entity: sensor.vrm_minimum_cell_voltage_batt_2
+soc_entity: sensor.victron_system_battery_soc
+watt_entity: sensor.vrm_battery_power_batt_1024
+cell_diff_sensor: sensor.vrm_minimum_cell_voltage_batt_1
+temp_entity: sensor.vrm_battery_temperature_batt_1
+show_values_on_top: false
 enable_animations: true
-columns: full
+title: Batterie Zellen
+thicker_borders: true
+min_voltage: 2.6
+max_voltage: 3.65
+show_average: false
 ```
+
+---
+
 
 ### CSS Elements
 

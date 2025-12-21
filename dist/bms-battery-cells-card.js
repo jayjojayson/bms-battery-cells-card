@@ -379,7 +379,7 @@ class BmsBatteryCellsCard extends HTMLElement {
                 statsHtml += `
                     <div class="stat-item">
                         <span class="stat-label">Ø Cell</span>
-                        <div class="${rowClass}" style="color: #ffffff">
+                        <div class="${rowClass}" style="color: var(--secondary-text-color, #9e9e9e)">
                             <ha-icon icon="mdi:chart-bell-curve"></ha-icon>
                             <span>${avg} <span style="font-size:0.8em">V</span></span>
                         </div>
