@@ -97,10 +97,9 @@ Nach der Installation kannst du die Karte zu deinem Dashboard hinzufügen:
 
 3.  **Optionen konfigurieren:**
     * Ein Konfigurationsfenster wird angezeigt, in dem alle Einstellungen bequem angepasst werden können.
-    * **BMS Entity:** Die Hauptentität oder Liste der Sensoren.
+    * **BMS Entity:** Die Hauptentitäten oder Liste der Sensoren.
     * **Voltage Range:** Definiere Min und Max Spannung für die grafische Darstellung.
-    * **Colors:** Passe die Farben für niedrige, normale und hohe Spannung an.
-
+    * **Details:** Blende Zusatzwerte wie Battery Power, Temp, Drif oder Durschnittsspannung an.
 
 ---
 
