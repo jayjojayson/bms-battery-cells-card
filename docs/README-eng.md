@@ -7,7 +7,7 @@
 [![stars](https://img.shields.io/github/stars/jayjojayson/bms-battery-cells-card)](https://github.com/jayjojayson/bms-battery-cells-card/stargazers)
 
 
-# bms-battery-cells-card
+# BMS Battery Cells Card
 Visualization of individual cell voltages of your battery storage system (BMS)
 
 
