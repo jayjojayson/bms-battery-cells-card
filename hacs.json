@@ -1,6 +1,5 @@
 {
   "name": "BMS Battery Cells Card",
-  "category": "plugin",
   "render_readme": true,
   "content_in_root": false,
   "filename": "bms-battery-cells-card.js"
