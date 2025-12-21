@@ -139,11 +139,6 @@ max_voltage: 3.6
 show_values: true
 show_min_max: true
 columns: 8
-card_mod:
-  style: |
-    ha-card {
-      background: rgba(0,0,0,0.5);
-    }
 ```
 
 ### CSS Elements
