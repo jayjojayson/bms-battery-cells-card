@@ -26,6 +26,7 @@ If you like this custom card, I would really appreciate a star rating ⭐. 🤗
 ### 🎨 **Dynamic coloring (thresholds)**
 ### ⚖️ **Balancing indicators**
 ### ✨ **Animated cells (Power in/out)**
+### ⚡ **Battery Temp & Power State (in/out)**
 ### 📐 **Flexible layout (grid/list)**
 ### ⚙️ **UI configuration**
 
