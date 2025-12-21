@@ -1,3 +1,7 @@
+/* * BMS Battery Cells Card - EDITOR
+ * Version: 2.2 (UI Reordering)
+ */
+
 const LitElement = customElements.get("ha-lit-element") || Object.getPrototypeOf(customElements.get("home-assistant-main"));
 const html = LitElement.prototype.html;
 const css = LitElement.prototype.css;
@@ -61,7 +65,6 @@ class BmsBatteryCellsCardEditor extends LitElement {
     if (target.tagName === 'HA-SWITCH') {
         newValue = target.checked;
     }
-    // Zahlen konvertieren
     if (target.type === 'number') {
         newValue = parseFloat(newValue);
     }
@@ -158,7 +161,7 @@ class BmsBatteryCellsCardEditor extends LitElement {
                     label="Minimale Spannung (V)"
                     type="number"
                     step="0.01"
-                    .value=${this._config.min_voltage ?? 2.5}
+                    .value=${this._config.min_voltage ?? 2.60}
                     .configValue=${'min_voltage'}
                     @input=${this._valueChanged}
                 ></ha-textfield>
@@ -178,6 +181,15 @@ class BmsBatteryCellsCardEditor extends LitElement {
                 <ha-switch
                     .checked=${this._config.show_values_on_top || false}
                     .configValue=${'show_values_on_top'}
+                    @change=${this._valueChanged}
+                ></ha-switch>
+            </div>
+
+            <div class="row">
+                <span>Dickere Balken-Ränder (2px)</span>
+                <ha-switch
+                    .checked=${this._config.thicker_borders || false}
+                    .configValue=${'thicker_borders'}
                     @change=${this._valueChanged}
                 ></ha-switch>
             </div>

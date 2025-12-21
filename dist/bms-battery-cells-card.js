@@ -36,11 +36,12 @@ class BmsBatteryCellsCard extends HTMLElement {
             cell_gap: 4,
             show_values_on_top: false,
             enable_animations: true,
-            min_voltage: 2.60, // Standard LiFePO4
-            max_voltage: 3.65, // Standard LiFePO4
+            min_voltage: 2.60,
+            max_voltage: 3.65,
             show_values: true,
             show_min_max: true,
             show_average: false,
+            thicker_borders: false, 
             ...config
         };
         this._initialized = false;
@@ -71,7 +72,7 @@ class BmsBatteryCellsCard extends HTMLElement {
     _initRender() {
         if (!this._config || !this._hass) return;
 
-        const { title, cells = [], card_height, cell_gap, show_values, min_voltage, max_voltage } = this._config;
+        const { title, cells = [], card_height, cell_gap, show_values, min_voltage, max_voltage, thicker_borders } = this._config;
         const colors = this._getColors();
         const cellCount = cells.length;
 
@@ -79,6 +80,8 @@ class BmsBatteryCellsCard extends HTMLElement {
         let valDisplay = show_values ? 'inline-block' : 'none';
         let nameFontSize = '10px';
         let namePadding = '2px 6px';
+        
+        let borderWidth = thicker_borders ? '2px' : '1px';
 
         if (cellCount > 10) { 
             valDisplay = 'none'; 
@@ -87,38 +90,32 @@ class BmsBatteryCellsCard extends HTMLElement {
         }
 
         // --- INTELLIGENTE SKALIERUNG ---
-        // Wir prüfen, ob die Standard LiFePO4 Werte genutzt werden
         const isStandard = (Math.abs(min_voltage - 2.60) < 0.01 && Math.abs(max_voltage - 3.65) < 0.01);
         
         let mapPoints = [];
         if (isStandard) {
-            // Die optimierte nicht-lineare Skala für LiFePO4
             mapPoints = [2.60, 2.80, 3.00, 3.20, 3.40, 3.45, 3.55, 3.65];
         } else {
-            // Dynamische lineare Skala für custom Min/Max
-            // Wir teilen den Bereich in 7 Segmente (8 Punkte)
             const range = max_voltage - min_voltage;
             const step = range / 7;
             for (let i = 0; i <= 7; i++) {
-                // Runden auf 3 Stellen um Floating Point Fehler zu vermeiden
                 const val = Math.round((min_voltage + (step * i)) * 1000) / 1000;
                 mapPoints.push(val);
             }
         }
 
-        // Labels für die Y-Achse (von oben nach unten für HTML)
         const scaleLabels = [...mapPoints].reverse().map(v => v.toFixed(2) + 'V');
 
         const trackGradient = `linear-gradient(to top, 
-            #d32f2f 0%,      /* Unten */
+            #d32f2f 0%,      /* 2.60V - Rot */
             #ef5350 7%,      
-            #ffa726 14.28%,  /* 1. Segment */
-            #ffd600 28.57%,  /* 2. Segment */
-            #43a047 42.85%,  /* 3. Segment */
-            #42a5f5 57.14%,  /* 4. Segment */
-            #1565c0 71.42%,  /* 5. Segment */
-            #ff7043 85.71%,  /* 6. Segment */
-            #ff5722 100%     /* Oben */
+            #ffa726 14.28%,  /* 2.80V - Orange */
+            #ffd600 28.57%,  /* 3.00V - Gelb */
+            #43a047 42.85%,  /* 3.20V - Grün */
+            #42a5f5 57.14%,  /* 3.40V - Hellblau */
+            #1565c0 71.42%,  /* 3.45V - Dunkelblau */
+            #ff7043 85.71%,  /* 3.55V - Orange High */
+            #ff5722 100%     /* 3.65V - Orange Ende */
         )`;
 
         const style = `
@@ -130,6 +127,7 @@ class BmsBatteryCellsCard extends HTMLElement {
                     --val-display: ${valDisplay};
                     --name-fs: ${nameFontSize};
                     --name-pad: ${namePadding};
+                    --bar-border-width: ${borderWidth};
                 }
                 
                 ha-card {
@@ -193,7 +191,8 @@ class BmsBatteryCellsCard extends HTMLElement {
                 }
                 .cell-bar {
                     position: absolute; bottom: 0; left: 0; right: 0;
-                    background: currentColor; border-top: 1px solid rgba(255,255,255,0.6);
+                    background: currentColor; 
+                    border-top: var(--bar-border-width) solid rgba(255,255,255,0.6);
                     z-index: 1; transition: height 0.4s ease-out;
                     border-radius: 2px 2px 6px 6px; 
                     opacity: 0.3; 
@@ -342,7 +341,8 @@ class BmsBatteryCellsCard extends HTMLElement {
             // 3. TEMP
             if (temp_entity) {
                 const valStr = tempVal !== null ? `${tempVal}°C` : '--';
-                const tColor = (tempVal !== null && tempVal < 0) ? '#42a5f5' : ((tempVal !== null && tempVal > 45) ? '#ef5350' : '#ffffff');
+                // Farbe: Blau bei Frost, Rot bei Hitze, sonst GRAU (Standard Text Secondary)
+                const tColor = (tempVal !== null && tempVal < 0) ? '#42a5f5' : ((tempVal !== null && tempVal > 45) ? '#ef5350' : 'var(--secondary-text-color, #9e9e9e)');
                 statsHtml += `
                     <div class="stat-item">
                         <span class="stat-label">Temp</span>
@@ -390,7 +390,6 @@ class BmsBatteryCellsCard extends HTMLElement {
         }
 
         // --- SKALIERUNG BERECHNEN ---
-        // Dies muss synchron zur Legende sein, daher wiederholen wir die Logik
         const isStandard = (Math.abs(min_voltage - 2.60) < 0.01 && Math.abs(max_voltage - 3.65) < 0.01);
         
         let mapPoints = [];
@@ -404,7 +403,6 @@ class BmsBatteryCellsCard extends HTMLElement {
             }
         }
         
-        // Konstante Schrittweite in Prozent (für die Segment-Höhe)
         const segmentSize = 100 / 7;
 
         // Min/Max Findung
@@ -447,23 +445,18 @@ class BmsBatteryCellsCard extends HTMLElement {
                 // --- BERECHNUNG DER HÖHE BASIEREND AUF SEGMENTEN ---
                 let pct = 0;
                 if (displayValNum > 0) {
-                    // Unteres Limit
                     if (displayValNum <= mapPoints[0]) {
                         pct = 0;
                     } 
-                    // Oberes Limit
                     else if (displayValNum >= mapPoints[7]) {
                         pct = 100;
                     } 
                     else {
-                        // Finde das passende Segment und interpoliere darin
                         for (let i = 0; i < 7; i++) {
                             const p1 = mapPoints[i];
                             const p2 = mapPoints[i+1];
                             if (displayValNum >= p1 && displayValNum < p2) {
-                                 // relativer Anteil im Segment (0..1)
                                  const rel = (displayValNum - p1) / (p2 - p1); 
-                                 // Prozentuale Gesamthöhe
                                  pct = (i * segmentSize) + (rel * segmentSize);
                                  break;
                             }
@@ -471,7 +464,7 @@ class BmsBatteryCellsCard extends HTMLElement {
                     }
                 }
                 
-                // Farben (Chemisch bedingt, bleiben so)
+                // Farben
                 let color = '#d32f2f'; 
                 if (displayValNum >= 2.80) color = '#ffa726'; 
                 if (displayValNum >= 3.00) color = '#ffd600'; 
