@@ -8,13 +8,14 @@
 
 
 # bms-battery-cells-card
-Visualization individual cell voltages of your battery storage system (BMS)
+Visualisierung der Einzelzellenspannungen deines Batteriespeichersystems (BMS)
 
 
 Die 🔋 **BMS Battery Cells Card** ist eine benutzerdefinierte Lovelace-Karte zur Visualisierung der einzelnen Zellspannungen deines Batteriespeichers (BMS). Sie bietet eine übersichtliche Darstellung des Zustands aller Zellen, inklusive Min/Max-Werten und Balancing-Status.
 
 Die Karte ist vollständig über die Benutzeroberfläche des Karteneditors konfigurierbar.
 Du benötigst die entsprechenden Entitäten deines BMS (z.B. Victron, JK-BMS, Daly), die die Zellspannungen in Home Assistant bereitstellen.
+Es funktionieren natürlich auch normale Batterien (AGM und Co) soweit ihr dafür Entitäten in HA erhaltet.
 
 Wenn euch die custom Card gefällt, würde ich mich sehr über eine Sternebewertung ⭐ freuen. 🤗
 
@@ -27,7 +28,7 @@ Wenn euch die custom Card gefällt, würde ich mich sehr über eine Sternebewert
 ### 📐 **Flexibles Layout (Grid/Liste)**
 ### ⚙️ **UI-Konfiguration**
 
-<img width="48%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/preview1.png" /> <img width="48%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/preview2.png" />
+<img width="48%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card.png" /> <img width="48%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card2.png" />
 
 ---
 
@@ -97,7 +98,6 @@ Nach der Installation kannst du die Karte zu deinem Dashboard hinzufügen:
     * **Voltage Range:** Definiere Min und Max Spannung für die grafische Darstellung.
     * **Colors:** Passe die Farben für niedrige, normale und hohe Spannung an.
 
-<img width="70%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/config-animation.gif" />
 
 ---
 
@@ -110,13 +110,13 @@ Obwohl die UI-Konfiguration empfohlen wird, kann die Karte auch manuell über de
 | name                  | typ      | required   | description                                                                                                 | standard                                 |
 | --------------------- | -------- | ---------- | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
 | `type`                | `string` | Yes        | `custom:bms-battery-cells-card`                                                                             |                                          |
-| `entity`              | `string` | Yes        | Die Entität des BMS (oder Liste der Zell-Sensoren).                                   		                  |                                          |
-| `title`   		      	| `string` | No         | Titel der Karte. 										                                                                        | 										                     |
-| `min_voltage`         | `number` | No         | Minimale Zellspannung für die Skala (z.B. 2.5V). 											                                      | `2.5`                 		        			 |
-| `max_voltage`         | `number` | No         | Maximale Zellspannung für die Skala (z.B. 3.65V). 														                              | `3.65`                                   |
-| `show_values`         | `boolean`| No         | Zeige die exakten Spannungswerte als Text. 											                                            | `true`                                   |
-| `show_min_max`	      | `boolean`| No         | Markiere die Zelle mit der niedrigsten/höchsten Spannung.									 		                        		  | `true`                		        			 |
-| `columns` 		        | `number` | No         | Anzahl der Spalten für die Zellen-Anzeige.                                                         				  | `4`               			          			 |
+| `entity`              | `string` | Yes        | Die Entität des BMS (oder Liste der Zell-Sensoren).                                  		                  |                                          |
+| `title`   		   	| `string` | No         | Titel der Karte. 										                                                      | 										                     |
+| `min_voltage`         | `number` | No         | Minimale Zellspannung für die Skala (z.B. 2.5V). 									                          | `2.5`                 		        			 |
+| `max_voltage`         | `number` | No         | Maximale Zellspannung für die Skala (z.B. 3.65V). 								                          | `3.65`                                   |
+| `show_values`         | `boolean`| No         | Zeige die exakten Spannungswerte als Text. 										                          | `true`                                   |
+| `show_min_max`	    | `boolean`| No         | Markiere die Zelle mit der niedrigsten/höchsten Spannung.							                  		  | `true`                		        			 |
+| `columns` 		    | `number` | No         | Anzahl der Spalten für die Zellen-Anzeige.                                                				  | `4`               			          			 |
 
 
 ### Beispielkonfiguration
