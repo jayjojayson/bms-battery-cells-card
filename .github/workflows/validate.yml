@@ -19,7 +19,7 @@ jobs:
       - name: Run HACS validation
         uses: hacs/action@main
         with:
-          category: integration
+          category: plugin
 
       # 2. Hassfest-Prüfungen
       # NEU: Verwendet die offizielle HA-Action, um Installationsfehler zu vermeiden.
