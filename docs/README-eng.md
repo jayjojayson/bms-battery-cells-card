@@ -138,8 +138,16 @@ simple example:
 
 ```yaml
 type: custom:bms-battery-cells-card
-entity: sensor.victron_system_battery_voltage
-title: Mein Akku
+title: Battery Cells
+cells:
+  - entity: sensor.cell_1
+    name: "1"
+  - entity: sensor.cell_2
+    name: "2"
+  - entity: sensor.cell_3
+    name: "3"
+  - entity: sensor.cell_4
+    name: "4"
 ```
 advanced example:
 
@@ -160,7 +168,7 @@ cell_diff_sensor: sensor.vrm_minimum_cell_voltage_batt_1
 temp_entity: sensor.vrm_battery_temperature_batt_1
 show_values_on_top: false
 enable_animations: true
-title: Batterie Zellen
+title: Battery Cells
 thicker_borders: true
 min_voltage: 2.6
 max_voltage: 3.65
@@ -207,7 +215,12 @@ show_average: false
 Header & Titel anpassen 
 ```yaml
 type: custom:bms-battery-cells-card
-entity: sensor.bms_cells
+title: Battery Cells
+cells:
+  - entity: sensor.cell_1
+    name: "1"
+  - entity: sensor.cell_2
+    name: "2"
 card_mod:
   style: |
     .title {
@@ -223,7 +236,12 @@ card_mod:
 Min-/Max-Zellen hervorheben  
 ```yaml
 type: custom:bms-battery-cells-card
-entity: sensor.bms_cells
+title: Battery Cells
+cells:
+  - entity: sensor.cell_1
+    name: "1"
+  - entity: sensor.cell_2
+    name: "2"
 card_mod:
   style: |
     .cell-wrapper.min-cell {
@@ -240,7 +258,12 @@ card_mod:
 Zellnamen dezenter darstellen 
 ```yaml
 type: custom:bms-battery-cells-card
-entity: sensor.bms_cells
+title: Battery Cells
+cells:
+  - entity: sensor.cell_1
+    name: "1"
+  - entity: sensor.cell_2
+    name: "2"
 card_mod:
   style: |
     .cell-name-badge {
@@ -254,7 +277,12 @@ card_mod:
 Tooltip Design anpassen (Touch, Hover) 
 ```yaml
 type: custom:bms-battery-cells-card
-entity: sensor.bms_cells
+title: Battery Cells
+cells:
+  - entity: sensor.cell_1
+    name: "1"
+  - entity: sensor.cell_2
+    name: "2"
 card_mod:
   style: |
     .cell-name-badge {
