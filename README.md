@@ -145,3 +145,46 @@ card_mod:
       background: rgba(0,0,0,0.5);
     }
 ```
+
+### CSS Elements
+
+| Selector            | Description                                                                 |
+| ------------------- | --------------------------------------------------------------------------- |
+| `ha-card`           | Der gesamte Karten-Container.                                               |
+| `.card-header`      | Der Titel der Karte.                                                        |
+| `.cells-container`  | Der Container, der alle Zellen umschließt.                                  |
+| `.cell-item`        | Eine einzelne Batteriezelle.                                                |
+| `.cell-voltage`     | Der Text der Spannung.                                                      |
+| `.cell-bar`         | Der visuelle Balken/Hintergrund der Zelle.                                  |
+| `.min-cell`         | Spezifische Klasse für die Zelle mit der niedrigsten Spannung.              |
+| `.max-cell`         | Spezifische Klasse für die Zelle mit der höchsten Spannung.                 |
+
+
+Schriftgröße und Farbe der Spannungen ändern  
+Macht den Text der Spannungswerte größer und fett.
+```yaml
+type: custom:bms-battery-cells-card
+entity: sensor.bms_cells
+card_mod:
+  style: |
+    .cell-voltage {
+      font-size: 16px;
+      font-weight: bold;
+      color: white;
+    }
+```
+
+Min-/Max-Zellen hervorheben  
+Fügt der Zelle mit der höchsten Spannung einen roten Rahmen und der Zelle mit der niedrigsten Spannung einen blauen Rahmen hinzu.
+```yaml
+type: custom:bms-battery-cells-card
+entity: sensor.bms_cells
+card_mod:
+  style: |
+    .max-cell {
+      border: 2px solid red;
+    }
+    .min-cell {
+      border: 2px solid blue;
+    }
+```

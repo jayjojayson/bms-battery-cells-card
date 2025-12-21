@@ -138,9 +138,47 @@ max_voltage: 3.6
 show_values: true
 show_min_max: true
 columns: 8
+```
+
+### CSS Elements
+
+| Selector            | Description                                                                 |
+| ------------------- | --------------------------------------------------------------------------- |
+| `ha-card`           | The entire card container.                                                  |
+| `.card-header`      | The title of the card.                                                      |
+| `.cells-container`  | The container wrapping all cells.                                           |
+| `.cell-item`        | A single battery cell.                                                      |
+| `.cell-voltage`     | The voltage text.                                                           |
+| `.cell-bar`         | The visual bar/background of the cell.                                      |
+| `.min-cell`         | Specific class for the cell with the lowest voltage.                        |
+| `.max-cell`         | Specific class for the cell with the highest voltage.                       |
+
+
+Change font size and color of voltages  
+Makes the voltage value text larger and bold.
+```yaml
+type: custom:bms-battery-cells-card
+entity: sensor.bms_cells
 card_mod:
   style: |
-    ha-card {
-      background: rgba(0,0,0,0.5);
+    .cell-voltage {
+      font-size: 16px;
+      font-weight: bold;
+      color: white;
+    }
+```
+
+Highlight Min/Max Cells  
+Adds a red border to the cell with the highest voltage and a blue border to the one with the lowest.
+```yaml
+type: custom:bms-battery-cells-card
+entity: sensor.bms_cells
+card_mod:
+  style: |
+    .max-cell {
+      border: 2px solid red;
+    }
+    .min-cell {
+      border: 2px solid blue;
     }
 ```
