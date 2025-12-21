@@ -22,9 +22,10 @@ If you like this custom card, I would really appreciate a star rating ⭐. 🤗
 ## Features
 
 ### 🔋 **Visualization of individual cell voltages**
-### 📉 **Min / Max / Average display**
+### 📉 **Min / Max / Drift / Average display**
 ### 🎨 **Dynamic coloring (thresholds)**
 ### ⚖️ **Balancing indicators**
+### ✨ **Animated cells (Power in/out)**
 ### 📐 **Flexible layout (grid/list)**
 ### ⚙️ **UI configuration**
 
@@ -152,6 +153,8 @@ show_min_max: true
 enable_animations: true
 columns: full
 ```
+
+---
 
 ### CSS Elements
 

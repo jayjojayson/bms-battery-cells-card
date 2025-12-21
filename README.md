@@ -22,9 +22,10 @@ Wenn euch die custom Card gefällt, würde ich mich sehr über eine Sternebewert
 ## Features
 
 ### 🔋 **Visualisierung einzelner Zellspannungen**
-### 📉 **Min / Max / Durchschnitts-Anzeige**
+### 📉 **Min / Max / Drift / Durchschnitts-Anzeige**
 ### 🎨 **Dynamische Farbgebung (Schwellenwerte)**
 ### ⚖️ **Balancing Indikatoren**
+### ✨ **Animierte Zellen (Power in/out)**
 ### 📐 **Flexibles Layout (Grid/Liste)**
 ### ⚙️ **UI-Konfiguration**
 
