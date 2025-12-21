@@ -26,6 +26,7 @@ Wenn euch die custom Card gefällt, würde ich mich sehr über eine Sternebewert
 ### 🎨 **Dynamische Farbgebung (Schwellenwerte)**
 ### ⚖️ **Balancing Indikatoren**
 ### ✨ **Animierte Zellen (Power in/out)**
+### ⚡ **Batterie Temp & Power Status (in/out)**
 ### 📐 **Flexibles Layout (Grid/Liste)**
 ### ⚙️ **UI-Konfiguration**
 
