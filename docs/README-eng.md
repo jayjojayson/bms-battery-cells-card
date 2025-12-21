@@ -49,7 +49,7 @@ If you like this custom card, I would really appreciate a star rating ⭐. 🤗
 <details>
   <summary> <b>Manuelle Installation über Hacs</b></summary>  
 
-### Manuelle Installation über Hacs 
+### Manual  Installation via Hacs 
 Open HACS in Home Assistant..
 
 - Go to "Frontend" and click the three dots in the upper right corner.
@@ -63,11 +63,11 @@ Open HACS in Home Assistant..
 <details>
   <summary> <b>Manuelle Installation in HA</b></summary>  
  
-### Manuelle Installation in HA
+### Manual  Installation in HA
 1.  **Download files:**
     * Download the bms-battery-cells-card.js from this repository.
 
-2.  **Dateien in Home Assistant hochladen:**
+2.  **import files to Home Assistant:**
     * Create a new folder named `bms-battery-cells-card` in the `www/community`-directory of your Home Assistant configuration. (The www directory is located in the same folder as your configuration.yaml).
     * Copy all downloaded files into this new folder. Your folder structure should look like this:
         ```
@@ -85,7 +85,7 @@ Open HACS in Home Assistant..
 
 ---
 
-## Konfiguration
+## Configuration
 
 After installation, you can add the card to your dashboard:
 
@@ -99,15 +99,15 @@ After installation, you can add the card to your dashboard:
     * A configuration dialog will open where all settings can be conveniently adjusted.
     * **BMS Entity:** The main entity or list of sensors.
     * **Voltage Range:** Define the minimum and maximum voltage for the graphical display.
-    * **Colors:** Adjust the colors for low, normal, and high voltage.
+    * **Details:** Display additional values ​​such as battery power, temperature, drift, or average voltage.
 
 ---
 
-## YAML-Modus (Alternative)
+## YAML-Modus (alternative)
 
 Obwohl die UI-Konfiguration empfohlen wird, kann die Karte auch manuell über den YAML-Editor konfiguriert werden:
 
-### Optionen
+### Options
 
 | name | type | required | description | default |
 | ---- | ---- | -------- | ----------- | ------- |
@@ -212,7 +212,7 @@ show_average: false
 | `ha-icon` | Icons used in the statistics section. |
 
 
-Header & Titel anpassen 
+Adjust Header & Titel
 ```yaml
 type: custom:bms-battery-cells-card
 title: Battery Cells
@@ -233,7 +233,7 @@ card_mod:
     }
 ```
 
-Min-/Max-Zellen hervorheben  
+Point out Min-/Max-Cells 
 ```yaml
 type: custom:bms-battery-cells-card
 title: Battery Cells
@@ -255,7 +255,7 @@ card_mod:
     }
 ```
 
-Zellnamen dezenter darstellen 
+Cell-Name present more discreetly
 ```yaml
 type: custom:bms-battery-cells-card
 title: Battery Cells
@@ -274,7 +274,7 @@ card_mod:
     }
 ```
 
-Tooltip Design anpassen (Touch, Hover) 
+Customize tooltip design (Touch, Hover) 
 ```yaml
 type: custom:bms-battery-cells-card
 title: Battery Cells
