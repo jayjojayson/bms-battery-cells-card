@@ -1,4 +1,4 @@
-![Home Assistant](https://img.shields.io/badge/home%20assistant-41BDF5?logo=home-assistant&logoColor=white)
+[![HACS validation](https://img.shields.io/github/actions/workflow/status/jayjojayson/bms-battery-cells-card/validate.yml?label=HACS%20Validation)](https://github.com/jayjojayson/bms-battery-cells-card/actions?query=workflow%3Avalidate)
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 [![GitHub release](https://img.shields.io/github/release/jayjojayson/bms-battery-cells-card?include_prereleases=&sort=semver&color=blue)](https://github.com/jayjojayson/bms-battery-cells-card/releases/)
 ![File size](https://img.shields.io/github/size/jayjojayson/bms-battery-cells-card/dist/bms-battery-cells-card.js?label=Card%20Size)
