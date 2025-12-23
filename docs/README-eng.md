@@ -21,14 +21,14 @@ If you like this custom card, I would really appreciate a star rating ⭐. 🤗
 
 ## Features
 
-### 🔋 **Visualization of individual cell voltages**
-### 📉 **Min / Max / Drift / Average display**
-### 🎨 **Dynamic coloring (thresholds)**
-### ⚖️ **Balancing indicators**
-### ✨ **Animated cells (Power in/out)**
-### ⚡ **Battery Temp & Power State (in/out)**
-### 📐 **Flexible layout (grid/list)**
-### ⚙️ **UI configuration**
+- ### 🔋 **Visualization of individual cell voltages**
+- ### 📉 **Min / Max / Drift / Average display**
+- ### 🎨 **Dynamic coloring (thresholds)**
+- ### ⚖️ **Balancing indicators**
+- ### ✨ **Animated cells (Power in/out)**
+- ### ⚡ **Battery Voltage, Current, Temp & Power State (in/out)**
+- ### 📐 **Flexible layout (grid/list)**
+- ### ⚙️ **UI configuration**
 
 <img width="48%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card.png" /> <img width="48%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card2.png" />
 <img width="96%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card_big.png" />
