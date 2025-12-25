@@ -8,7 +8,7 @@
 
 
 # BMS Battery Cells Card
-Visualisierung der Einzelzellenspannungen deines Batteriespeichersystems (BMS)
+Visualisierung der Einzelzellenspannungen deines Batteriespeichersystems (BMS) 
 
 
 Die 🔋 **BMS Battery Cells Card** ist eine benutzerdefinierte Lovelace-Karte zur Visualisierung der einzelnen Zellspannungen deines Batteriespeichers (BMS). Sie bietet eine übersichtliche Darstellung des Zustands aller Zellen, inklusive Min/Max-Werten und Balancing-Status.
@@ -30,9 +30,10 @@ Wenn euch die custom Card gefällt, würde ich mich sehr über eine Sternebewert
 - ### 📐 **Flexibles Layout (Grid/Liste)**
 - ### ⚙️ **UI-Konfiguration**
 
-<img width="48%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card-compact.png" />
-<img width="48%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card.png" /> <img width="48%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card2.png" />
+<img width="48%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card.png" /> <img width="48%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card2.png" />  
 <img width="96%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card_big.png" />
+<img width="48%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card-compact.png" />  
+
 
 ---
 
