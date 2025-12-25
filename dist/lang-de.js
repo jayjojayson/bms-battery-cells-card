@@ -12,6 +12,7 @@ export default {
         min_voltage: "Minimale Spannung (V)",
         max_voltage: "Maximale Spannung (V)",
         show_header_values: "Werte über Icons anzeigen (Header)",
+        hide_bars: "Balkendiagramme ausblenden (Kompaktmodus)",
         thick_borders: "Dickere Balken-Ränder (2px)",
         enable_animations: "Animationen aktivieren",
         show_cell_voltages: "Spannungswerte anzeigen",

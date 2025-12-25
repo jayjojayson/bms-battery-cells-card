@@ -2,14 +2,15 @@
 import de from './lang-de.js';
 import en from './lang-en.js';
 
-const LitElement = customElements.get("ha-lit-element") || Object.getPrototypeOf(customElements.get("home-assistant-main"));
-const html = LitElement.prototype.html;
-const css = LitElement.prototype.css;
+// Robuste LitElement Erkennung (verhindert Absturz, wenn Element noch nicht geladen)
+const LitElement = customElements.get("ha-lit-element") || Object.getPrototypeOf(customElements.get("home-assistant-main") || customElements.get("hui-view"));
+const html = LitElement ? LitElement.prototype.html : (s) => console.error("LitElement not found!") || "";
+const css = LitElement ? LitElement.prototype.css : (s) => "";
 
 // SVG Icon für Löschen
 const ICON_CLOSE = "M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z";
 
-class BmsBatteryCellsCardEditor extends LitElement {
+class BmsBatteryCellsCardEditor extends (LitElement || HTMLElement) {
   constructor() {
     super();
     this.langs = { de, en };
@@ -101,7 +102,7 @@ class BmsBatteryCellsCardEditor extends LitElement {
 
   _editCell(index, key, value) {
     const newCells = [...(this._config.cells || [])];
-    newCells.splice(index, 1);
+    newCells[index] = { ...newCells[index], [key]: value };
     this._fireConfigChanged({ ...this._config, cells: newCells });
   }
 
@@ -212,6 +213,7 @@ class BmsBatteryCellsCardEditor extends LitElement {
                 ></ha-textfield>
             </div>
 
+            <!-- 1. Header Values -->
             <div class="row">
                 <span>${this._localize('editor.show_header_values')}</span>
                 <ha-switch
@@ -221,6 +223,17 @@ class BmsBatteryCellsCardEditor extends LitElement {
                 ></ha-switch>
             </div>
 
+            <!-- 2. NEU: Hide Bars (Compact Mode) - an zweiter Stelle -->
+            <div class="row">
+                <span>${this._localize('editor.hide_bars')}</span>
+                <ha-switch
+                    .checked=${this._config.hide_bars || false}
+                    .configValue=${'hide_bars'}
+                    @change=${this._valueChanged}
+                ></ha-switch>
+            </div>
+
+            <!-- 3. Thick Borders -->
             <div class="row">
                 <span>${this._localize('editor.thick_borders')}</span>
                 <ha-switch

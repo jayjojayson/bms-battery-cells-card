@@ -3,7 +3,7 @@ import de from './lang-de.js';
 import en from './lang-en.js';
 
 console.log(
-  "%c🔋 BMS Battery Cells Card v_1.1 loaded",
+  "%c🔋 BMS Battery Cells Card v_1.2 loaded",
   "background: #2ecc71; color: #000; padding: 2px 6px; border-radius: 4px; font-weight: bold;"
 );
 
@@ -43,6 +43,7 @@ class BmsBatteryCellsCard extends HTMLElement {
             card_height: 380,
             cell_gap: 4,
             show_values_on_top: false,
+            hide_bars: false, // Default: Bars anzeigen
             enable_animations: true,
             min_voltage: 2.60,
             max_voltage: 3.65,
@@ -90,7 +91,7 @@ class BmsBatteryCellsCard extends HTMLElement {
     _initRender() {
         if (!this._config || !this._hass) return;
 
-        const { title, cells = [], card_height, cell_gap, show_values, min_voltage, max_voltage, thicker_borders } = this._config;
+        const { title, cells = [], card_height, cell_gap, show_values, min_voltage, max_voltage, thicker_borders, hide_bars } = this._config;
         const colors = this._getColors();
         const cellCount = cells.length;
 
@@ -107,10 +108,8 @@ class BmsBatteryCellsCard extends HTMLElement {
         }
 
         const isStandard = (Math.abs(min_voltage - 2.60) < 0.01 && Math.abs(max_voltage - 3.65) < 0.01);
-        let mapPoints = [];
-        if (isStandard) {
-            mapPoints = [2.60, 2.80, 3.00, 3.20, 3.40, 3.45, 3.55, 3.65];
-        } else {
+        let mapPoints = isStandard ? [2.60, 2.80, 3.00, 3.20, 3.40, 3.45, 3.55, 3.65] : [];
+        if (!isStandard) {
             const range = max_voltage - min_voltage;
             const step = range / 7;
             for (let i = 0; i <= 7; i++) {
@@ -143,12 +142,15 @@ class BmsBatteryCellsCard extends HTMLElement {
                     --name-fs: ${nameFontSize};
                     --name-pad: ${namePadding};
                     --bar-border-width: ${borderWidth};
+                    /* Steuerung der Sichtbarkeit bei Kompaktmodus */
+                    --main-display: ${hide_bars ? 'none' : 'flex'};
                 }
                 
                 ha-card {
                     display: flex;
                     flex-direction: column;
-                    height: ${card_height}px;
+                    /* Wenn hide_bars aktiv ist, Höhe auf auto setzen, sonst feste Höhe */
+                    height: ${hide_bars ? 'auto' : card_height + 'px'};
                     padding: 16px;
                     box-sizing: border-box;
                     position: relative;
@@ -161,10 +163,10 @@ class BmsBatteryCellsCard extends HTMLElement {
                     grid-template-areas: "title stats" "subinfo stats";
                     grid-template-columns: 1fr auto; 
                     align-items: center;
-                    margin-bottom: 12px; 
+                    margin-bottom: ${hide_bars ? '0px' : '12px'}; 
                     flex-shrink: 0; 
                     padding-bottom: 8px;
-                    border-bottom: 1px solid rgba(255,255,255,0.05);
+                    border-bottom: ${hide_bars ? 'none' : '1px solid rgba(255,255,255,0.05)'};
                 }
                 .title { grid-area: title; font-size: 1.3rem; font-weight: 500; letter-spacing: 0.5px; color: ${colors.text}; margin-top: -4px; }
                 
@@ -192,7 +194,10 @@ class BmsBatteryCellsCard extends HTMLElement {
                 .stat-label { font-size: 0.75rem; color: var(--secondary-text-color); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
                 
                 .main-container.cells-container {
-                    flex: 1; display: flex; gap: var(--cell-gap); align-items: flex-end; position: relative; overflow: hidden;
+                    flex: 1; 
+                    display: var(--main-display); /* Hier wird ausgeblendet wenn hide_bars true */
+                    gap: var(--cell-gap); align-items: flex-end; position: relative;
+                    overflow: hidden;
                 }
                 .cell-wrapper.cell-item {
                     flex: 1; height: 100%; position: relative; border-radius: 6px; overflow: visible;
@@ -260,7 +265,9 @@ class BmsBatteryCellsCard extends HTMLElement {
                         <div class="cell-wrapper cell-item" id="cell-wrap-${index}">
                             <div class="custom-tooltip" id="tooltip-${index}">-</div>
                             <div class="cell-track-bg"></div>
-                            <div class="cell-bar" id="bar-${index}" style="height: 0%;"><div class="charging-overlay"></div></div>
+                            <div class="cell-bar" id="bar-${index}" style="height: 0%;">
+                                <div class="charging-overlay"></div>
+                            </div>
                             <div class="cell-info-layer">
                                 <div class="cell-val-wrap"><span class="cell-val-badge cell-voltage" id="val-${index}">-</span></div>
                                 <div class="cell-name-wrap"><span class="cell-name-badge">${cell.name}</span></div>
@@ -317,20 +324,17 @@ class BmsBatteryCellsCard extends HTMLElement {
         });
         
         // --- SMART DOM UPDATE HELPER ---
-        // Aktualisiert Elemente statt sie neu zu erstellen, um Flackern (Hover-Verlust) zu verhindern
         const updateElement = (container, id, index, renderFn) => {
             let el = container.querySelector(`#${id}`);
             if (!el) {
                 el = document.createElement('div');
                 el.id = id;
-                // Positionierung
                 if (index < container.children.length) {
                     container.insertBefore(el, container.children[index]);
                 } else {
                     container.appendChild(el);
                 }
             }
-            // Falls Element woanders steht, verschieben
             if (container.children[index] !== el) {
                  if (index < container.children.length) container.insertBefore(el, container.children[index]);
                  else container.appendChild(el);
@@ -377,9 +381,11 @@ class BmsBatteryCellsCard extends HTMLElement {
             if (temp_entity && temp !== null) {
                 idx += updateElement(subInfoContainer, 'sub-temp', idx, (el) => {
                     el.className = 'sub-info-item';
-                    const tColor = (temp < 0) ? '#42a5f5' : ((temp > 45) ? '#ef5350' : 'var(--secondary-text-color)');
+                    const valNum = parseFloat(temp);
+                    const valFormatted = isNaN(valNum) ? '0.00' : valNum.toFixed(2);
+                    const tColor = (valNum < 10) ? '#42a5f5' : ((valNum > 30) ? '#ef5350' : 'var(--secondary-text-color)');
                     el.style.color = tColor;
-                    const content = `<ha-icon icon="mdi:thermometer" style="${tColor ? 'color:'+tColor : ''}"></ha-icon><span>${temp}°C</span>`;
+                    const content = `<ha-icon icon="mdi:thermometer" style="${tColor ? 'color:'+tColor : ''}"></ha-icon><span>${valFormatted}°C</span>`;
                     if(el.innerHTML !== content) el.innerHTML = content;
                     el.onclick = (e) => { e.stopPropagation(); this._fireMoreInfo(temp_entity); };
                 });
@@ -425,7 +431,7 @@ class BmsBatteryCellsCard extends HTMLElement {
             let driftEntity = null;
             let driftColor = '';
             
-            // Decide source
+            // Ausgwählter Drift berechent oder Entität
             if (cell_diff_sensor && diffVal !== null) {
                 driftEntity = cell_diff_sensor;
                 driftColor = (diffVal > 20) ? '#ef5350' : '#66bb6a';
@@ -464,7 +470,9 @@ class BmsBatteryCellsCard extends HTMLElement {
             } else idx += removeElement(statsContainer, 'stat-avg');
         }
 
-        // --- CELLS UPDATE (Bar Logic - unchanged) ---
+        // --- CELLS UPDATE (Skipped if hidden) ---
+        if (this._config.hide_bars) return;
+
         const isStandard = (Math.abs(min_voltage - 2.60) < 0.01 && Math.abs(max_voltage - 3.65) < 0.01);
         let mapPoints = isStandard ? [2.60, 2.80, 3.00, 3.20, 3.40, 3.45, 3.55, 3.65] : [];
         if (!isStandard) {
