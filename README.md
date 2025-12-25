@@ -8,7 +8,7 @@
 
 
 # BMS Battery Cells Card
-Visualisierung der Einzelzellenspannungen deines Batteriespeichersystems (BMS)
+Visualisierung der Einzelzellenspannungen deines Batteriespeichersystems (BMS) 
 
 
 Die 🔋 **BMS Battery Cells Card** ist eine benutzerdefinierte Lovelace-Karte zur Visualisierung der einzelnen Zellspannungen deines Batteriespeichers (BMS). Sie bietet eine übersichtliche Darstellung des Zustands aller Zellen, inklusive Min/Max-Werten und Balancing-Status.
