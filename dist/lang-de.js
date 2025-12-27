@@ -13,6 +13,8 @@ export default {
         max_voltage: "Maximale Spannung (V)",
         show_header_values: "Werte über Icons anzeigen (Header)",
         hide_bars: "Balkendiagramme ausblenden (Kompaktmodus)",
+        horizontal_layout: "Horizontales Layout (Listenansicht)",
+        show_as_table: "Als Tabelle anzeigen (Keine Balken)",
         thick_borders: "Dickere Balken-Ränder (2px)",
         enable_animations: "Animationen aktivieren",
         show_cell_voltages: "Spannungswerte anzeigen",

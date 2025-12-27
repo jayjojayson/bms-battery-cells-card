@@ -27,6 +27,7 @@ If you like this custom card, I would really appreciate a star rating ⭐. 🤗
 - ### ⚖️ **Balancing indicators**
 - ### ✨ **Animated cells (Power in/out)**
 - ### ⚡ **Battery Voltage, Current, Temp & Power State (in/out)**
+- ### 📱 **Various view options**
 - ### 📐 **Flexible layout (grid/list)**
 - ### ⚙️ **UI configuration**
 

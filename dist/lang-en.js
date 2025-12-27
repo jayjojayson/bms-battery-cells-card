@@ -13,6 +13,8 @@ export default {
         max_voltage: "Max Voltage (V)",
         show_header_values: "Show Values above Icons (Header)",
         hide_bars: "Hide Bar Charts (Compact Mode)",
+        horizontal_layout: "Horizontal Layout (List View)",
+        show_as_table: "Show as Table (No Bars)",
         thick_borders: "Thicker Bar Borders (2px)",
         enable_animations: "Enable Animations",
         show_cell_voltages: "Show Cell Voltages",

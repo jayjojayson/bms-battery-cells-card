@@ -2,15 +2,14 @@
 import de from './lang-de.js';
 import en from './lang-en.js';
 
-// Robuste LitElement Erkennung (verhindert Absturz, wenn Element noch nicht geladen)
-const LitElement = customElements.get("ha-lit-element") || Object.getPrototypeOf(customElements.get("home-assistant-main") || customElements.get("hui-view"));
-const html = LitElement ? LitElement.prototype.html : (s) => console.error("LitElement not found!") || "";
-const css = LitElement ? LitElement.prototype.css : (s) => "";
+const LitElement = customElements.get("ha-lit-element") || Object.getPrototypeOf(customElements.get("home-assistant-main"));
+const html = LitElement.prototype.html;
+const css = LitElement.prototype.css;
 
 // SVG Icon für Löschen
 const ICON_CLOSE = "M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z";
 
-class BmsBatteryCellsCardEditor extends (LitElement || HTMLElement) {
+class BmsBatteryCellsCardEditor extends LitElement {
   constructor() {
     super();
     this.langs = { de, en };
@@ -55,8 +54,6 @@ class BmsBatteryCellsCardEditor extends (LitElement || HTMLElement) {
     const lang = this.hass?.locale?.language || 'en';
     const code = lang.split('-')[0]; // 'de-DE' -> 'de'
     const dict = this.langs[code] || this.langs['en'];
-    
-    // Key traversing (e.g. "editor.title")
     return key.split('.').reduce((o, i) => (o ? o[i] : null), dict) || key;
   }
 
@@ -87,7 +84,6 @@ class BmsBatteryCellsCardEditor extends (LitElement || HTMLElement) {
     this._fireConfigChanged({ ...this._config, [configValue]: newValue });
   }
 
-  /* --- ZELLEN LOGIK --- */
   _addCell() {
     const newCells = [...(this._config.cells || [])];
     newCells.push({ name: `${newCells.length + 1}`, entity: '' });
@@ -108,7 +104,6 @@ class BmsBatteryCellsCardEditor extends (LitElement || HTMLElement) {
 
   render() {
     if (!this.hass || !this._config) return html``;
-
     const cells = this._config.cells || [];
 
     return html`
@@ -213,7 +208,6 @@ class BmsBatteryCellsCardEditor extends (LitElement || HTMLElement) {
                 ></ha-textfield>
             </div>
 
-            <!-- 1. Header Values -->
             <div class="row">
                 <span>${this._localize('editor.show_header_values')}</span>
                 <ha-switch
@@ -223,7 +217,16 @@ class BmsBatteryCellsCardEditor extends (LitElement || HTMLElement) {
                 ></ha-switch>
             </div>
 
-            <!-- 2. NEU: Hide Bars (Compact Mode) - an zweiter Stelle -->
+            <!-- TABELLEN ANSICHT -->
+            <div class="row">
+                <span>${this._localize('editor.show_as_table')}</span>
+                <ha-switch
+                    .checked=${this._config.show_as_table || false}
+                    .configValue=${'show_as_table'}
+                    @change=${this._valueChanged}
+                ></ha-switch>
+            </div>
+
             <div class="row">
                 <span>${this._localize('editor.hide_bars')}</span>
                 <ha-switch
@@ -233,7 +236,15 @@ class BmsBatteryCellsCardEditor extends (LitElement || HTMLElement) {
                 ></ha-switch>
             </div>
 
-            <!-- 3. Thick Borders -->
+            <div class="row">
+                <span>${this._localize('editor.horizontal_layout')}</span>
+                <ha-switch
+                    .checked=${this._config.horizontal_layout || false}
+                    .configValue=${'horizontal_layout'}
+                    @change=${this._valueChanged}
+                ></ha-switch>
+            </div>
+
             <div class="row">
                 <span>${this._localize('editor.thick_borders')}</span>
                 <ha-switch
