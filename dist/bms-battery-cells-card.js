@@ -1,11 +1,23 @@
-import "./bms-battery-cells-card-editor.js";
 import de from './lang-de.js';
 import en from './lang-en.js';
 
 console.log(
-  "%c🔋 BMS Battery Cells Card v_1.3 loaded",
+  "%c🔋 BMS Battery Cells Card v_1.3.1 loaded",
   "background: #2ecc71; color: #000; padding: 2px 6px; border-radius: 4px; font-weight: bold;"
 );
+
+// Helper um sicherzustellen, dass HA-Komponenten verfügbar sind
+const loadCardHelpers = async () => {
+  if (window.loadCardHelpers) return window.loadCardHelpers();
+  if (customElements.get("hui-view")) {
+    const element = document.createElement("hui-view");
+    if (element.getCardHelpers) return element.getCardHelpers();
+  }
+  return undefined;
+};
+
+// LitElement Helper
+const LitElement = customElements.get("ha-lit-element") || Object.getPrototypeOf(customElements.get("home-assistant-main"));
 
 class BmsBatteryCellsCard extends HTMLElement {
     constructor() {
@@ -15,7 +27,10 @@ class BmsBatteryCellsCard extends HTMLElement {
         this.langs = { de, en };
     }
 
-    static getConfigElement() {
+    // Wir laden den Editor dynamisch und stellen sicher, dass Helfer da sind
+    static async getConfigElement() {
+        await import("./bms-battery-cells-card-editor.js");
+        await loadCardHelpers();
         return document.createElement("bms-battery-cells-card-editor");
     }
 
@@ -45,7 +60,7 @@ class BmsBatteryCellsCard extends HTMLElement {
             show_values_on_top: false,
             hide_bars: false,
             horizontal_layout: false,
-            show_as_table: false, // NEU: Tabellenansicht
+            show_as_table: false,
             enable_animations: true,
             min_voltage: 2.60,
             max_voltage: 3.65,
@@ -435,9 +450,11 @@ class BmsBatteryCellsCard extends HTMLElement {
             if (temp_entity && temp !== null) {
                 idx += updateElement(subInfoContainer, 'sub-temp', idx, (el) => {
                     el.className = 'sub-info-item';
-                    const tColor = (temp < 0) ? '#42a5f5' : ((temp > 45) ? '#ef5350' : 'var(--secondary-text-color)');
+                    const valNum = parseFloat(temp);
+                    const valFormatted = isNaN(valNum) ? '0.00' : valNum.toFixed(2);
+                    const tColor = (valNum < 12) ? '#42a5f5' : ((valNum > 28) ? '#ef5350' : 'var(--secondary-text-color)');
                     el.style.color = tColor;
-                    const content = `<ha-icon icon="mdi:thermometer" style="${tColor ? 'color:'+tColor : ''}"></ha-icon><span>${temp}°C</span>`;
+                    const content = `<ha-icon icon="mdi:thermometer" style="${tColor ? 'color:'+tColor : ''}"></ha-icon><span>${valFormatted}°C</span>`;
                     if(el.innerHTML !== content) el.innerHTML = content;
                     el.onclick = (e) => { e.stopPropagation(); this._fireMoreInfo(temp_entity); };
                 });

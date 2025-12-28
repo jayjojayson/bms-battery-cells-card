@@ -1,13 +1,15 @@
-
 import de from './lang-de.js';
 import en from './lang-en.js';
 
+// Helper um LitElement sicher zu laden
 const LitElement = customElements.get("ha-lit-element") || Object.getPrototypeOf(customElements.get("home-assistant-main"));
 const html = LitElement.prototype.html;
 const css = LitElement.prototype.css;
 
-// SVG Icon für Löschen
 const ICON_CLOSE = "M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z";
+
+// Selector Konfiguration für Sensoren
+const sensorSelector = { entity: { domain: "sensor" } };
 
 class BmsBatteryCellsCardEditor extends LitElement {
   constructor() {
@@ -38,7 +40,14 @@ class BmsBatteryCellsCardEditor extends LitElement {
         margin-bottom: 10px;
         display: flex; gap: 10px; align-items: center;
       }
-      ha-textfield, ha-entity-picker { width: 100%; display: block; }
+      
+      /* Auch ha-selector braucht Platz wenn er lädt */
+      ha-textfield, ha-selector { 
+          width: 100%; 
+          display: block; 
+          min-height: 56px; 
+      }
+      
       .cell-name { width: 90px; flex-shrink: 0; }
       .cell-entity { flex: 1; }
       .add-button { width: 100%; margin-top: 8px; }
@@ -52,7 +61,7 @@ class BmsBatteryCellsCardEditor extends LitElement {
 
   _localize(key) {
     const lang = this.hass?.locale?.language || 'en';
-    const code = lang.split('-')[0]; // 'de-DE' -> 'de'
+    const code = lang.split('-')[0]; 
     const dict = this.langs[code] || this.langs['en'];
     return key.split('.').reduce((o, i) => (o ? o[i] : null), dict) || key;
   }
@@ -66,18 +75,26 @@ class BmsBatteryCellsCardEditor extends LitElement {
     this.dispatchEvent(event);
   }
 
-  _valueChanged(ev) {
+  // Erweiterte Logik um auch Keys direkt übergeben zu können
+  _valueChanged(ev, key) {
     if (!this._config) return;
-    const target = ev.target;
-    const configValue = target.configValue; 
+    
+    // Key aus dem Event-Target holen ODER direkt übergeben bekommen
+    const configValue = key || ev.target.configValue; 
     
     if (!configValue) return;
 
-    let newValue = target.value;
-    if (target.tagName === 'HA-SWITCH') {
-        newValue = target.checked;
+    let newValue = ev.target.value;
+    
+    // Wichtig für ha-selector: Der Wert kommt oft im 'detail'
+    if (ev.detail && ev.detail.value !== undefined) {
+        newValue = ev.detail.value;
     }
-    if (target.type === 'number') {
+
+    if (ev.target.tagName === 'HA-SWITCH') {
+        newValue = ev.target.checked;
+    }
+    if (ev.target.type === 'number') {
         newValue = parseFloat(newValue);
     }
 
@@ -119,70 +136,58 @@ class BmsBatteryCellsCardEditor extends LitElement {
         <div>
             <span class="section-header">${this._localize('editor.main_sensors')}</span>
             
-            <ha-entity-picker
-              label="${this._localize('editor.soc')}"
+            <ha-selector
+              .label="${this._localize('editor.soc')}"
               .hass=${this.hass}
-              .value=${this._config.soc_entity || ''}
-              .configValue=${'soc_entity'}
-              domain-filter="sensor"
-              allow-custom-entity
-              @value-changed=${this._valueChanged}
+              .selector=${sensorSelector}
+              .value=${this._config.soc_entity}
+              @value-changed=${(e) => this._valueChanged(e, 'soc_entity')}
               style="margin-bottom: 8px;"
-            ></ha-entity-picker>
+            ></ha-selector>
 
-            <ha-entity-picker
-              label="${this._localize('editor.power')}"
+            <ha-selector
+              .label="${this._localize('editor.power')}"
               .hass=${this.hass}
-              .value=${this._config.watt_entity || ''}
-              .configValue=${'watt_entity'}
-              domain-filter="sensor"
-              allow-custom-entity
-              @value-changed=${this._valueChanged}
+              .selector=${sensorSelector}
+              .value=${this._config.watt_entity}
+              @value-changed=${(e) => this._valueChanged(e, 'watt_entity')}
               style="margin-bottom: 8px;"
-            ></ha-entity-picker>
+            ></ha-selector>
 
-            <ha-entity-picker
-              label="${this._localize('editor.voltage')}"
+            <ha-selector
+              .label="${this._localize('editor.voltage')}"
               .hass=${this.hass}
-              .value=${this._config.total_voltage_entity || ''}
-              .configValue=${'total_voltage_entity'}
-              domain-filter="sensor"
-              allow-custom-entity
-              @value-changed=${this._valueChanged}
+              .selector=${sensorSelector}
+              .value=${this._config.total_voltage_entity}
+              @value-changed=${(e) => this._valueChanged(e, 'total_voltage_entity')}
               style="margin-bottom: 8px;"
-            ></ha-entity-picker>
+            ></ha-selector>
 
-            <ha-entity-picker
-              label="${this._localize('editor.current')}"
+            <ha-selector
+              .label="${this._localize('editor.current')}"
               .hass=${this.hass}
-              .value=${this._config.total_current_entity || ''}
-              .configValue=${'total_current_entity'}
-              domain-filter="sensor"
-              allow-custom-entity
-              @value-changed=${this._valueChanged}
+              .selector=${sensorSelector}
+              .value=${this._config.total_current_entity}
+              @value-changed=${(e) => this._valueChanged(e, 'total_current_entity')}
               style="margin-bottom: 8px;"
-            ></ha-entity-picker>
+            ></ha-selector>
 
-            <ha-entity-picker
-              label="${this._localize('editor.drift')}"
+            <ha-selector
+              .label="${this._localize('editor.drift')}"
               .hass=${this.hass}
-              .value=${this._config.cell_diff_sensor || ''}
-              .configValue=${'cell_diff_sensor'}
-              domain-filter="sensor"
-              allow-custom-entity
-              @value-changed=${this._valueChanged}
+              .selector=${sensorSelector}
+              .value=${this._config.cell_diff_sensor}
+              @value-changed=${(e) => this._valueChanged(e, 'cell_diff_sensor')}
               style="margin-bottom: 8px;"
-            ></ha-entity-picker>
+            ></ha-selector>
 
-            <ha-entity-picker
-              label="${this._localize('editor.temp')}"
+            <ha-selector
+              .label="${this._localize('editor.temp')}"
               .hass=${this.hass}
-              .value=${this._config.temp_entity || ''}
-              .configValue=${'temp_entity'}
-              domain-filter="sensor"
-              allow-custom-entity
-              @value-changed=${this._valueChanged}
-            ></ha-entity-picker>
+              .selector=${sensorSelector}
+              .value=${this._config.temp_entity}
+              @value-changed=${(e) => this._valueChanged(e, 'temp_entity')}
+            ></ha-selector>
         </div>
 
         <div>
@@ -217,7 +222,6 @@ class BmsBatteryCellsCardEditor extends LitElement {
                 ></ha-switch>
             </div>
 
-            <!-- TABELLEN ANSICHT -->
             <div class="row">
                 <span>${this._localize('editor.show_as_table')}</span>
                 <ha-switch
@@ -312,15 +316,14 @@ class BmsBatteryCellsCardEditor extends LitElement {
                     @input=${(e) => this._editCell(index, 'name', e.target.value)}
                 ></ha-textfield>
                 
-                <ha-entity-picker
+                <ha-selector
                     class="cell-entity"
-                    label="${this._localize('editor.cell_entity')}"
+                    .label="${this._localize('editor.cell_entity')}"
                     .hass=${this.hass}
-                    .value=${cell.entity || ''}
-                    domain-filter="sensor"
-                    allow-custom-entity
+                    .selector=${sensorSelector}
+                    .value=${cell.entity}
                     @value-changed=${(e) => this._editCell(index, 'entity', e.detail.value)}
-                ></ha-entity-picker>
+                ></ha-selector>
 
                 <ha-icon-button
                     .path=${ICON_CLOSE}
