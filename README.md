@@ -3,33 +3,33 @@
 [![GitHub release](https://img.shields.io/github/release/jayjojayson/bms-battery-cells-card?include_prereleases=&sort=semver&color=blue)](https://github.com/jayjojayson/bms-battery-cells-card/releases/)
 ![File size](https://img.shields.io/github/size/jayjojayson/bms-battery-cells-card/dist/bms-battery-cells-card.js?label=Card%20Size)
 ![last commit](https://img.shields.io/github/last-commit/jayjojayson/bms-battery-cells-card)
-[![README English](https://img.shields.io/badge/README-Eng-orange)](https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/README-eng.md)
+[![README Deutsch](https://img.shields.io/badge/README-DE-orange)](https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/README-de.md)
 [![stars](https://img.shields.io/github/stars/jayjojayson/bms-battery-cells-card)](https://github.com/jayjojayson/bms-battery-cells-card/stargazers)
 
 
 # BMS Battery Cells Card
-Visualisierung der Einzelzellenspannungen deines Batteriespeichersystems (BMS) 
+Visualization of individual cell voltages of your battery storage system (BMS)
 
 
-Die 🔋 **BMS Battery Cells Card** ist eine benutzerdefinierte Lovelace-Karte zur Visualisierung der einzelnen Zellspannungen deines Batteriespeichers (BMS). Sie bietet eine übersichtliche Darstellung des Zustands aller Zellen, inklusive Min/Max-Werten und Balancing-Status.
+The 🔋 BMS Battery Cells Card is a custom Lovelace card for visualizing the individual cell voltages of your battery storage system (BMS). It provides a clear overview of the status of all cells, including min/max values and balancing status.
 
-Die Karte ist vollständig über die Benutzeroberfläche des Karteneditors konfigurierbar.
-Du benötigst die entsprechenden Entitäten deines BMS (z.B. Victron, JK-BMS, Daly), die die Zellspannungen in Home Assistant bereitstellen.
-Es funktionieren natürlich auch normale Batterien (AGM und Co) soweit ihr dafür Entitäten in HA erhaltet.
+The card can be fully configured via the card editor user interface.
+You need the corresponding entities from your BMS (e.g. Victron, JK-BMS, Daly) that provide the cell voltages in Home Assistant.
+Regular batteries (AGM and similar) also work, as long as you have suitable entities available in Home Assistant.
 
-Wenn euch die custom Card gefällt, würde ich mich sehr über eine Sternebewertung ⭐ freuen. 🤗
+If you like this custom card, I would really appreciate a star rating ⭐. 🤗
 
 ## Features
 
-- ### 🔋 **Visualisierung einzelner Zellspannungen**
-- ### 📉 **Min / Max / Drift / Durchschnitts-Anzeige**
-- ### 🎨 **Dynamische Farbgebung (Schwellenwerte)**
-- ### ⚖️ **Balancing Indikatoren**
-- ### ✨ **Animierte Zellen (Power in/out)**
-- ### ⚡ **Batterie Voltage, Current, Temp & Power Status (in/out)**
-- ### 📱 **Verschiedene Ansichtsoptionen**
-- ### 📐 **Flexibles Layout (Grid/Liste)**
-- ### ⚙️ **UI-Konfiguration**
+- ### 🔋 **Visualization of individual cell voltages**
+- ### 📉 **Min / Max / Drift / Average display**
+- ### 🎨 **Dynamic coloring (thresholds)**
+- ### ⚖️ **Balancing indicators**
+- ### ✨ **Animated cells (Power in/out)**
+- ### ⚡ **Battery Voltage, Current, Temp & Power State (in/out)**
+- ### 📱 **Various view options**
+- ### 📐 **Flexible layout (grid/list)**
+- ### ⚙️ **UI configuration**
 
 <img width="48%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card.png" /> <img width="48%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card2.png" />  
 <img width="96%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card_big.png" />
@@ -40,109 +40,108 @@ Wenn euch die custom Card gefällt, würde ich mich sehr über eine Sternebewert
 
 ## Installation
 
-### HACS (Empfohlen)
+### HACS (Recommended)
 
-- Das github über den Link in Home Assistant einfügen.
+- Add the GitHub repository via the link in Home Assistant.
  
   [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=jayjojayson&repository=bms-battery-cells-card&category=plugin)
 
-- Die "BMS Battery Cells Card" sollte nun in HACS verfügbar sein. Klicke auf "INSTALLIEREN" ("INSTALL").
-- Die Ressource wird automatisch zu deiner Lovelace-Konfiguration hinzugefügt.
+- The "BMS Battery Cells Card" should now be available in HACS. Click "INSTALL".
+- The resource will be automatically added to your Lovelace configuration.
 
 <details>
   <summary> <b>Manuelle Installation über Hacs</b></summary>  
 
-### Manuelle Installation über Hacs 
-Öffne HACS in Home Assistant.
+### Manual  Installation via Hacs 
+Open HACS in Home Assistant..
 
-- Gehe zu "Frontend" und klicke auf die drei Punkte in der oberen rechten Ecke.
-- Wähle "Benutzerdefinierte Repositories" ("Custom repositories") aus.
-- Füge die URL zu deinem GitHub-Repository hinzu und wähle "Lovelace" als Kategorie.
-- Klicke auf "HINZUFÜGEN" ("ADD").
-- Die "BMS Battery Cells Card" sollte nun in HACS verfügbar sein. Klicke auf "INSTALLIEREN" ("INSTALL").
-- Die Ressource wird automatisch zu deiner Lovelace-Konfiguration hinzugefügt.
+- Go to "Frontend" and click the three dots in the upper right corner.
+- Select "Custom repositories".
+- Add the URL of your GitHub repository and select "Lovelace" as the category.
+- Click "ADD".
+- The "BMS Battery Cells Card" should now be available in HACS. Click "INSTALL".
+- The resource will be automatically added to your Lovelace configuration.
 </details>
 
 <details>
   <summary> <b>Manuelle Installation in HA</b></summary>  
  
-### Manuelle Installation in HA
-1.  **Dateien herunterladen:**
-    * Lade die `bms-battery-cells-card.js` aus diesem Repository herunter.
+### Manual  Installation in HA
+1.  **Download files:**
+    * Download the bms-battery-cells-card.js from this repository.
 
-2.  **Dateien in Home Assistant hochladen:**
-    * Erstelle einen neuen Ordner namens `bms-battery-cells-card` im `www/community`-Verzeichnis deiner Home Assistant-Konfiguration. (Das `www`-Verzeichnis befindet sich im selben Ordner wie deine `configuration.yaml`).
-    * Kopiere **alle heruntergeladenen Dateien** in diesen neuen Ordner. Deine Ordnerstruktur sollte wie folgt aussehen:
+2.  **import files to Home Assistant:**
+    * Create a new folder named `bms-battery-cells-card` in the `www/community`-directory of your Home Assistant configuration. (The www directory is located in the same folder as your configuration.yaml).
+    * Copy all downloaded files into this new folder. Your folder structure should look like this:
         ```
         /config/www/community/bms-battery-cells-card/bms-battery-cells-card.js
         ```
 
-3.  **Ressource zu Home Assistant hinzufügen:**
-    * Gehe in Home Assistant zu **Einstellungen > Dashboards**.
-    * Klicke auf das Menü mit den drei Punkten oben rechts und wähle **Ressourcen**.
-    * Klicke auf **+ Ressource hinzufügen**.
-    * Gebe als URL `/local/community/bms-battery-cells-card/bms-battery-cells-card.js` ein.
-    * Wähle als Ressourcentyp **JavaScript-Modul**.
-    * Klicke auf **Erstellen**.
+3.  **Add the resource to Home Assistant::**
+    * In Home Assistant, go to Settings > Dashboards.
+	* Click the three-dot menu in the top right corner and select Resources.
+	* Click + Add resource.
+	* Enter /local/community/bms-battery-cells-card/bms-battery-cells-card.js as the URL.
+	* Select JavaScript module as the resource type.
+	* Click Create.
 </details>
 
 ---
 
-## Konfiguration
+## Configuration
 
-Nach der Installation kannst du die Karte zu deinem Dashboard hinzufügen:
+After installation, you can add the card to your dashboard:
 
-1.  **Bearbeitungsmodus aktivieren:**
-    * Öffne das Dashboard, zu dem die Karte hinzufügt werden soll, und klicke auf **Bearbeiten**.
+1.  **Enable edit mode:**
+    * Open the dashboard where you want to add the card and click **Edit.**.
 
-2.  **Karte hinzufügen:**
-    * Klicke auf **+ Karte hinzufügen** und suche nach der **"BMS Battery Cells Card"**.
+2.  **Add card:**
+    * Click + Add card and search for **"BMS Battery Cells Card"**.
 
-3.  **Optionen konfigurieren:**
-    * Ein Konfigurationsfenster wird angezeigt, in dem alle Einstellungen bequem angepasst werden können.
-    * **BMS Entity:** Die Hauptentitäten oder Liste der Sensoren.
-    * **Voltage Range:** Definiere Min und Max Spannung für die grafische Darstellung.
-    * **Details:** Blende Zusatzwerte wie Battery Power, Temp, Drif oder Durschnittsspannung an.
+3.  **Configure options:**
+    * A configuration dialog will open where all settings can be conveniently adjusted.
+    * **BMS Entity:** The main entity or list of sensors.
+    * **Voltage Range:** Define the minimum and maximum voltage for the graphical display.
+    * **Details:** Display additional values ​​such as battery power, temperature, drift, or average voltage.
 
 ---
 
-## YAML-Modus (Alternative)
+## YAML-Modus (alternative)
 
 Obwohl die UI-Konfiguration empfohlen wird, kann die Karte auch manuell über den YAML-Editor konfiguriert werden:
 
-### Optionen
+### Options
 
-| name | typ | erforderlich | Beschreibung | Standard |
-| ---- | --- | ------------ | ------------ | -------- |
-| `type` | `string` | Ja | Kartentyp. Muss `custom:bms-battery-cells-card` sein. | |
-| `title` | `string` | Nein | Titel, der oben in der Karte angezeigt wird. | `"Batterie Zellen"` |
-| `cells` | `list` | Ja | Liste der Zellen (jeweils mit Entität und optionalem Namen). | 4 Beispiel-Zellen |
-| `cells[].entity` | `string` | Ja | Sensor-Entität der Zellspannung. | |
-| `cells[].name` | `string` | Nein | Anzeigename der Zelle. | Zell-Index |
-| `show_legend` | `boolean` | Nein | Zeigt die Spannungs-Skala (Y-Achse) auf der linken Seite an. | `true` |
-| `container_padding` | `number` | Nein | Innenabstand des Karten-Containers in Pixeln. | `16` |
-| `card_height` | `number` | Nein | Feste Höhe der Karte in Pixeln. | `380` |
-| `cell_gap` | `number` | Nein | Abstand zwischen einzelnen Zellen in Pixeln. | `4` |
-| `show_values` | `boolean` | Nein | Zeigt die exakten Zellspannungen als Text an. | `true` |
-| `show_values_on_top` | `boolean` | Nein | Zeigt Statistikwerte oberhalb der Icons an. | `false` |
-| `enable_animations` | `boolean` | Nein | Aktiviert Lade- und Entlade-Animationen. | `true` |
-| `min_voltage` | `number` | Nein | Minimale Zellspannung für die Skalierung. | `2.60` |
-| `max_voltage` | `number` | Nein | Maximale Zellspannung für die Skalierung. | `3.65` |
-| `show_min_max` | `boolean` | Nein | Markiert die Zellen mit minimaler und maximaler Spannung. | `true` |
-| `show_average` | `boolean` | Nein | Zeigt die durchschnittliche Zellspannung in den Statistiken an. | `false` |
-| `soc_entity` | `string` | Nein | Sensor-Entität für den Ladezustand (SoC). | |
-| `watt_entity` | `string` | Nein | Leistungs-Sensor (positiv = Laden, negativ = Entladen). | |
-| `cell_diff_sensor` | `string` | Nein | Sensor für die Zellspannungs-Abweichung (mV). | |
-| `temp_entity` | `string` | Nein | Sensor-Entität für die Batterietemperatur. | |
+| name | type | required | description | default |
+| ---- | ---- | -------- | ----------- | ------- |
+| `type` | `string` | Yes | Card type definition. Must be `custom:bms-battery-cells-card`. | |
+| `title` | `string` | No | Title displayed at the top of the card. | `"Batterie Zellen"` |
+| `cells` | `list` | Yes | List of cell definitions (entity + name). | 4 example cells |
+| `cells[].entity` | `string` | Yes | Sensor entity representing the cell voltage. | |
+| `cells[].name` | `string` | No | Display name of the cell. | Cell index |
+| `show_legend` | `boolean` | No | Show voltage scale (Y-axis) on the left side. | `true` |
+| `container_padding` | `number` | No | Inner padding of the card container (px). | `16` |
+| `card_height` | `number` | No | Fixed height of the card in pixels. | `380` |
+| `cell_gap` | `number` | No | Gap between individual cells (px). | `4` |
+| `show_values` | `boolean` | No | Display voltage values inside each cell. | `true` |
+| `show_values_on_top` | `boolean` | No | Display statistic values above icons instead of inline. | `false` |
+| `enable_animations` | `boolean` | No | Enable charging/discharging animations. | `true` |
+| `min_voltage` | `number` | No | Minimum cell voltage for scaling. | `2.60` |
+| `max_voltage` | `number` | No | Maximum cell voltage for scaling. | `3.65` |
+| `show_min_max` | `boolean` | No | Highlight the cells with minimum and maximum voltage. | `true` |
+| `show_average` | `boolean` | No | Display average cell voltage in statistics. | `false` |
+| `soc_entity` | `string` | No | State of Charge (SoC) sensor entity. | |
+| `watt_entity` | `string` | No | Power sensor entity (positive = charging, negative = discharging). | |
+| `cell_diff_sensor` | `string` | No | Cell voltage drift sensor (mV). | |
+| `temp_entity` | `string` | No | Battery temperature sensor entity. | |
 
+### Example configuration
 
-### Beispielkonfiguration
-
-Einfaches Beispiel:
+simple example:
 
 ```yaml
 type: custom:bms-battery-cells-card
-title: Batterie Zellen
+title: Battery Cells
 cells:
   - entity: sensor.cell_1
     name: "1"
@@ -153,7 +152,7 @@ cells:
   - entity: sensor.cell_4
     name: "4"
 ```
-Erweitertes Beispiel:
+advanced example:
 
 ```yaml
 type: custom:bms-battery-cells-card
@@ -172,7 +171,7 @@ cell_diff_sensor: sensor.vrm_minimum_cell_voltage_batt_1
 temp_entity: sensor.vrm_battery_temperature_batt_1
 show_values_on_top: false
 enable_animations: true
-title: Batterie Zellen
+title: Battery Cells
 thicker_borders: true
 min_voltage: 2.6
 max_voltage: 3.65
@@ -181,46 +180,45 @@ show_average: false
 
 ---
 
-
 ### CSS Elements
 
 | Selector | Description |
 | :--- | :--- |
-| `.header` | Kopfbereich der Karte. |
-| `.card-header` | Header mit Titel und Statistiken. |
-| `.title` | Karten-Titel. |
-| `.stats` | Container für Statistikwerte. |
-| `.stat-item` | Einzelner Statistikblock. |
-| `.stat-label` | Beschriftung der Statistik. |
-| `.stat-value-row` | Zeile mit Icon und Wert. |
-| `.vertical-layout` | Vertikale Anordnung von Icon/Wert. |
-| `.main-container` | Hauptcontainer der Zellen. |
-| `.cells-container` | Container für alle Zell-Elemente. |
-| `.legend-col` | Spannungs-Skala (Y-Achse). |
-| `.cell-wrapper` | Wrapper einer einzelnen Zelle. |
-| `.cell-item` | Einzelne Batteriezelle. |
-| `.min-cell` | Markierung der Zelle mit Minimalspannung. |
-| `.max-cell` | Markierung der Zelle mit Maximalspannung. |
-| `.custom-tooltip` | Tooltip bei Klick / Hover. |
-| `.cell-track-bg` | Hintergrund mit Farbverlauf. |
-| `.cell-bar` | Spannungs-Balken. |
-| `.is-charging` | Lade-Animation aktiv. |
-| `.is-discharging` | Entlade-Animation aktiv. |
-| `.charging-overlay` | Animiertes Overlay. |
-| `.cell-info-layer` | Overlay für Labels. |
-| `.cell-name-wrap` | Container für Zellnamen. |
-| `.cell-name-badge` | Badge mit Zellnamen. |
-| `.cell-val-wrap` | Container für Spannungswert. |
-| `.cell-val-badge` | Spannungs-Anzeige. |
-| `.cell-voltage` | Kennzeichnung Spannungswert. |
-| `ha-card` | Home Assistant Kartencontainer. |
-| `ha-icon` | Icons in Statistikbereich. |
+| `.header` | Card header area. |
+| `.card-header` | Header containing the title and statistics. |
+| `.title` | Card title. |
+| `.stats` | Container for statistic values. |
+| `.stat-item` | Individual statistic block. |
+| `.stat-label` | Label of a statistic value. |
+| `.stat-value-row` | Row containing icon and value. |
+| `.vertical-layout` | Vertical layout for icon/value. |
+| `.main-container` | Main container for the cells. |
+| `.cells-container` | Container holding all cell elements. |
+| `.legend-col` | Voltage scale (Y-axis). |
+| `.cell-wrapper` | Wrapper for a single cell. |
+| `.cell-item` | Individual battery cell. |
+| `.min-cell` | Highlights the cell with the lowest voltage. |
+| `.max-cell` | Highlights the cell with the highest voltage. |
+| `.custom-tooltip` | Tooltip shown on click / hover. |
+| `.cell-track-bg` | Cell background with gradient. |
+| `.cell-bar` | Voltage bar of the cell. |
+| `.is-charging` | Charging animation active. |
+| `.is-discharging` | Discharging animation active. |
+| `.charging-overlay` | Animated overlay layer. |
+| `.cell-info-layer` | Overlay layer for labels. |
+| `.cell-name-wrap` | Container for the cell name. |
+| `.cell-name-badge` | Badge displaying the cell name. |
+| `.cell-val-wrap` | Container for the voltage value. |
+| `.cell-val-badge` | Voltage value display. |
+| `.cell-voltage` | Voltage value modifier. |
+| `ha-card` | Home Assistant card container. |
+| `ha-icon` | Icons used in the statistics section. |
 
 
-Header & Titel anpassen 
+Adjust Header & Titel
 ```yaml
 type: custom:bms-battery-cells-card
-title: Batterie Zellen
+title: Battery Cells
 cells:
   - entity: sensor.cell_1
     name: "1"
@@ -238,10 +236,10 @@ card_mod:
     }
 ```
 
-Min-/Max-Zellen hervorheben  
+Point out Min-/Max-Cells 
 ```yaml
 type: custom:bms-battery-cells-card
-title: Batterie Zellen
+title: Battery Cells
 cells:
   - entity: sensor.cell_1
     name: "1"
@@ -260,10 +258,10 @@ card_mod:
     }
 ```
 
-Zellnamen dezenter darstellen 
+Cell-Name present more discreetly
 ```yaml
 type: custom:bms-battery-cells-card
-title: Batterie Zellen
+title: Battery Cells
 cells:
   - entity: sensor.cell_1
     name: "1"
@@ -279,10 +277,10 @@ card_mod:
     }
 ```
 
-Tooltip Design anpassen (Touch, Hover) 
+Customize tooltip design (Touch, Hover) 
 ```yaml
 type: custom:bms-battery-cells-card
-title: Batterie Zellen
+title: Battery Cells
 cells:
   - entity: sensor.cell_1
     name: "1"
