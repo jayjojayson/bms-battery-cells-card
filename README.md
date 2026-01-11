@@ -138,9 +138,9 @@ After installation, you can add the card to your dashboard:
 
 ---
 
-## YAML-Modus (alternative)
+## YAML-Mode (optinal)
 
-Obwohl die UI-Konfiguration empfohlen wird, kann die Karte auch manuell über den YAML-Editor konfiguriert werden:
+Although UI configuration is recommended, the map can also be configured manually via the YAML editor:
 
 ### Options
 
