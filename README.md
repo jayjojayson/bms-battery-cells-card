@@ -82,7 +82,7 @@ detailed view:
 - The resource will be automatically added to your Lovelace configuration.
 
 <details>
-  <summary> <b>Manuelle Installation über Hacs</b></summary>  
+  <summary> <b>Manual Installation via Hacs</b></summary>  
 
 ### Manual  Installation via Hacs 
 Open HACS in Home Assistant..
@@ -96,7 +96,7 @@ Open HACS in Home Assistant..
 </details>
 
 <details>
-  <summary> <b>Manuelle Installation in HA</b></summary>  
+  <summary> <b>Manual Installation in HA</b></summary>  
  
 ### Manual  Installation in HA
 1.  **Download files:**
