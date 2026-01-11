@@ -17,24 +17,56 @@ The card can be fully configured via the card editor user interface.
 You need the corresponding entities from your BMS (e.g. Victron, JK-BMS, Daly) that provide the cell voltages in Home Assistant.
 Regular batteries (AGM and similar) also work, as long as you have suitable entities available in Home Assistant.
 
-If you like this custom card, I would really appreciate a star rating ⭐. 🤗
+Supported Card languages are English and German. If you need other languages as well, tell me.
+
+If you like this custom card, I would really appreciate a star rating ⭐. Thanks 🤗
 
 ## Features
 
-- ### 🔋 **Visualization of individual cell voltages**
-- ### 📉 **Min / Max / Drift / Average display**
-- ### 🎨 **Dynamic coloring (thresholds)**
-- ### ⚖️ **Balancing indicators**
-- ### ✨ **Animated cells (Power in/out)**
-- ### ⚡ **Battery Voltage, Current, Temp & Power State (in/out)**
-- ### 📱 **Various view options**
-- ### 📐 **Flexible layout (grid/list)**
-- ### ⚙️ **UI configuration**
+### 🔋 **Visualizations & Layouts**
+- **Individual Cell Voltage:** Bar charts with dynamic color thresholds (Min/Max/Avg)
+- **Multiple Layout Modes:**
+  - 📏 **Standard View:** Classic bar chart visualization
+  - 📋 **Table View:** Compact grid showing only numbers (no bars)
+  - 📃 **List View:** Horizontal layout for a list-like appearance
+  - 🎛️ **Detailed View:** A full BMS dashboard view
+- **Compact Mode:** Option to hide bars and show only header stats
+- **Animations:** Charging (power in) and Discharging (power out) animations on cell bars
+
+### 📈 **Detailed View (optional)**
+- **Integrated Charts:** Live history graphs for **Total Voltage** and **Cell Drift** (using Chart.js)
+- **Extended BMS Metrics:** Display of **SoH**, **Cycles**, **Capacity** (Ah), and **MOS Temperature**
+- **Remaining Capacity:** Auto-calculation based on Amp-hours and SoC
+- **Cell List:** detailed table of all cell voltages including individual balancing status
+- **Hybrid View:** Option to show the standard cell bars *inside* the detailed view
+
+### ⚡ **BMS Control & Interactive Elements**
+- **Interactive Status Switches:** Toggle **Charge**, **Discharge**, and **Balance** directly from the card (supports Switches, Input Booleans, and Input Selects)
+- **Custom State Logic:** Define custom values for "On" and "Off" states (e.g., `True`/`False`, `On`/`Off`)
+- **Click Actions:** Click on sensors, charts, or cells to open the Home Assistant "More Info" dialog
+
+### 📉 **Statistics & Monitoring**
+- **Real-time Stats:** Total Voltage, Current, Power (Watt), and Temperature
+- **Smart Drift Calculation:** Automatically calculates the delta between Min and Max cells (or uses an external sensor)
+- **Min/Max Indicators:** Visual highlighting of the highest and lowest voltage cells
+- **Average Voltage:** Option to display the calculated average cell voltage
+
+### ⚙️ **Configuration & Customization**
+- **UI Editor:** Fully configurable via the Home Assistant UI editor (no YAML required)
+- **Thresholds:** Adjustable Minimum and Maximum voltage for color scaling
+- **Visual Tweaks:** Options for thicker borders, hiding header values, and a lot more
+
 
 <img width="48%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card.png" /> <img width="48%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card2.png" />  
 <img width="96%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card_big.png" />
 <img width="48%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card-compact-2.png" />  <img width="48%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card-compact.png" />  
 <img width="48%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card-ani.gif" /> 
+
+---
+
+detailed view:
+
+<img width="96%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card-detailed-view.png" />
 
 ---
 

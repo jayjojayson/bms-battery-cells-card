@@ -7,7 +7,7 @@ export default {
         voltage: "Total Voltage (Volt)",
         current: "Total Current (Ampere)",
         drift: "Cell Drift External Sensor (Delta mV)",
-        temp: "Battery Temperature (°C)",
+        temp: "Battery Temp (°C)",
         display_options: "Display & Options",
         min_voltage: "Min Voltage (V)",
         max_voltage: "Max Voltage (V)",
@@ -24,13 +24,51 @@ export default {
         cells: "Cells",
         add_cell: "Add Cell",
         cell_name: "Name",
-        cell_entity: "Entity"
+        cell_entity: "Entity",
+        
+        // Detailed View Options
+        show_detailed_view: "Enable Detailed View",
+        show_cell_list: "Show Cell Voltage List", 
+        show_standard_in_detail: "Show Standard View (Bars) at bottom", 
+        show_charts: "Show Charts",
+        detailed_sensors: "Detailed View Sensors (optional)",
+        soh: "SoH (Health %)",
+        capacity: "Capacity (Ah)",
+        cycle_capacity: "Cycle Capacity (Ah)",
+        cycles: "Cycle Count",
+        temp_mos: "MOS Temp (°C)",
+        
+        stat_charge: "Charge (Switch/Input Boolean/Select)",
+        stat_discharge: "Discharge (Switch/Input Boolean/Select)",
+        stat_balance: "Balancing (Switch/Input Boolean/Select)",
+        
+        // Custom State Values
+        val_on: "Value for ON (e.g. 'ON' or 'True')",
+        val_off: "Value for OFF (e.g. 'OFF' or 'False')"
     },
     card: {
         power: "Power",
         soc: "SoC",
         temp: "Temp",
         drift: "Drift",
-        avg_cell: "Ø Cell"
+        avg_cell: "Ø Cell",
+        
+        // Detailed View Labels
+        batt_voltage: "Battery Voltage",
+        delta_cell_vol: "Delta Cell Voltage",
+        max_cell: "Max Cell",
+        charge: "Charge",
+        discharge: "Discharge",
+        balance: "Balance",
+        on: "ON",
+        off: "OFF",
+        soh: "SoH",
+        batt_capacity: "Battery Capacity",
+        cycle_capacity: "Cycle Capacity",
+        cycle_count: "Cycle Count",
+        mos_temp: "MOS Temp.",
+        min_temp: "Min Temp.",
+        max_temp: "Max Temp.",
+        remain_capacity: "Remain Capacity"
     }
 };
