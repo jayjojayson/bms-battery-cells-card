@@ -15,7 +15,7 @@ Die 🔋 **BMS Battery Cells Card** ist eine benutzerdefinierte Lovelace-Karte z
 
 Die Karte ist vollständig über die Benutzeroberfläche des Karteneditors konfigurierbar.
 Du benötigst die entsprechenden Entitäten deines BMS (z.B. Victron, JK-BMS, Daly), die die Zellspannungen in Home Assistant bereitstellen.
-Es funktionieren natürlich auch normale Batterien (AGM und Co) soweit ihr dafür Entitäten in HA erhaltet.
+Es funktionieren natürlich auch normale Batterien (AGM und Co mit 12, 24v oder 48v) soweit ihr dafür Entitäten in HA erhaltet.
 
 Wenn euch die custom Card gefällt, würde ich mich sehr über eine Sternebewertung ⭐ freuen. Danke 🤗
 
@@ -41,6 +41,8 @@ Wenn euch die custom Card gefällt, würde ich mich sehr über eine Sternebewert
 ### ⚡ **BMS Steuerung & Interaktion**
 - **Interaktive Statusschalter:** Steuerung von **Laden**, **Entladen** und **Balancing** direkt aus der Karte (unterstützt Switches, Input Booleans und Input Selects)
 - **Benutzerdefinierte Zustandslogik:** Definition eigener Werte für "Ein" und "Aus" Status (z. B. `True`/`False`, `On`/`Off`, `Balancing`)
+- **Balance-Schalter:** Für BMS wie Seplos, TDT, Daily oder JBD
+- **Balance-Sensor:** Definiere einen Balance-Sensor für jede Zelle (wie JK-BMS)
 - **Klick-Aktionen:** Ein Klick auf Sensoren, Diagramme oder Zellen öffnet den standard Home Assistant "More Info" Dialog
 
 ### 📉 **Statistiken & Überwachung**
@@ -59,7 +61,7 @@ standard-view:
 <img width="48%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card.png" /> <img width="48%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card2.png" />  
 <img width="96%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card_big.png" />
 <img width="48%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card-compact-2.png" />  <img width="48%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card-compact.png" />  
-<img width="48%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card-ani.gif" /> 
+<img width="48%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card_one_cell.png" />  <img width="48%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card-ani.gif" /> 
 
 ---
 

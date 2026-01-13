@@ -10,7 +10,7 @@ const ICON_CLOSE = "M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.4
 
 // Selector Konfiguration für Sensoren
 const sensorSelector = { entity: { domain: "sensor" } };
-const binarySelector = { entity: { domain: ["binary_sensor", "sensor", "input_boolean"] } };
+const binarySelector = { entity: { domain: ["binary_sensor", "sensor", "input_boolean", "switch"] } };
 const switchSelector = { entity: { domain: ["switch", "input_boolean", "input_select", "binary_sensor"] } };
 
 class BmsBatteryCellsCardEditor extends LitElement {
@@ -35,22 +35,47 @@ class BmsBatteryCellsCardEditor extends LitElement {
         color: var(--primary-text-color);
       }
       .row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+      
       .list-row {
         background: var(--secondary-background-color, rgba(0,0,0,0.05)); 
-        padding: 10px; border-radius: 8px; 
+        padding: 10px; 
+        padding-right: 48px; /* Platz für den Löschen-Button rechts */
+        border-radius: 8px; 
         border: 1px solid var(--divider-color, rgba(0,0,0,0.1));
         margin-bottom: 10px;
-        display: flex; gap: 10px; align-items: center;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        position: relative;
       }
-      
+
+      .cell-row-top, .cell-row-bottom {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+      }
+
       ha-textfield, ha-selector { 
           width: 100%; display: block; min-height: 56px; 
       }
       
       .cell-name { width: 90px; flex-shrink: 0; }
+      .cell-spacer { width: 90px; flex-shrink: 0; } /* Leerraum unter dem Namen */
       .cell-entity { flex: 1; }
+      
       .add-button { width: 100%; margin-top: 8px; }
-      ha-icon-button { color: var(--error-color); cursor: pointer; --mdc-icon-button-size: 36px; }
+      
+      /* Löschen Button absolut positioniert */
+      .delete-btn { 
+          position: absolute; 
+          top: 50%; 
+          right: 2px; 
+          transform: translateY(-50%);
+          color: var(--error-color); 
+          cursor: pointer; 
+          --mdc-icon-button-size: 36px; 
+      }
       
       .detailed-options {
           background: rgba(33, 150, 243, 0.05);
@@ -111,7 +136,7 @@ class BmsBatteryCellsCardEditor extends LitElement {
 
   _addCell() {
     const newCells = [...(this._config.cells || [])];
-    newCells.push({ name: `${newCells.length + 1}`, entity: '' });
+    newCells.push({ name: `${newCells.length + 1}`, entity: '', balance_entity: '' });
     this._fireConfigChanged({ ...this._config, cells: newCells });
   }
 
@@ -243,9 +268,15 @@ class BmsBatteryCellsCardEditor extends LitElement {
             <span class="section-header">${this._localize('editor.cells')}</span>
             ${cells.map((cell, index) => html`
               <div class="list-row">
-                <ha-textfield class="cell-name" label="${this._localize('editor.cell_name')}" .value=${cell.name || ''} @input=${(e) => this._editCell(index, 'name', e.target.value)}></ha-textfield>
-                <ha-selector class="cell-entity" .label="${this._localize('editor.cell_entity')}" .hass=${this.hass} .selector=${sensorSelector} .value=${cell.entity} @value-changed=${(e) => this._editCell(index, 'entity', e.detail.value)}></ha-selector>
-                <ha-icon-button .path=${ICON_CLOSE} @click=${() => this._removeCell(index)}></ha-icon-button>
+                <div class="cell-row-top">
+                    <ha-textfield class="cell-name" label="${this._localize('editor.cell_name')}" .value=${cell.name || ''} @input=${(e) => this._editCell(index, 'name', e.target.value)}></ha-textfield>
+                    <ha-selector class="cell-entity" .label="${this._localize('editor.cell_entity')}" .hass=${this.hass} .selector=${sensorSelector} .value=${cell.entity} @value-changed=${(e) => this._editCell(index, 'entity', e.detail.value)}></ha-selector>
+                </div>
+                <div class="cell-row-bottom">
+                    <div class="cell-spacer"></div>
+                    <ha-selector class="cell-entity" .label="${this._localize('editor.cell_balance_entity')}" .hass=${this.hass} .selector=${binarySelector} .value=${cell.balance_entity} @value-changed=${(e) => this._editCell(index, 'balance_entity', e.detail.value)}></ha-selector>
+                </div>
+                <ha-icon-button class="delete-btn" .path=${ICON_CLOSE} @click=${() => this._removeCell(index)}></ha-icon-button>
               </div>
             `)}
             <mwc-button class="add-button" outlined @click=${this._addCell}>

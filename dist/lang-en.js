@@ -24,7 +24,8 @@ export default {
         cells: "Cells",
         add_cell: "Add Cell",
         cell_name: "Name",
-        cell_entity: "Entity",
+        cell_entity: "Voltage Entity",
+        cell_balance_entity: "Balancer Entity (opt.)", // NEU
         
         // Detailed View Options
         show_detailed_view: "Enable Detailed View",
@@ -40,7 +41,7 @@ export default {
         
         stat_charge: "Charge (Switch/Input Boolean/Select)",
         stat_discharge: "Discharge (Switch/Input Boolean/Select)",
-        stat_balance: "Balancing (Switch/Input Boolean/Select)",
+        stat_balance: "Balancing Global (Switch/Input Boolean/Select)",
         
         // Custom State Values
         val_on: "Value for ON (e.g. 'ON' or 'True')",

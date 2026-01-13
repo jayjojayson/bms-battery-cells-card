@@ -14,8 +14,8 @@ Visualization of individual cell voltages of your battery storage system (BMS)
 The 🔋 BMS Battery Cells Card is a custom Lovelace card for visualizing the individual cell voltages of your battery storage system (BMS). It provides a clear overview of the status of all cells, including min/max values and balancing status.
 
 The card can be fully configured via the card editor user interface.
-You need the corresponding entities from your BMS (e.g. Victron, JK-BMS, Daly) that provide the cell voltages in Home Assistant.
-Regular batteries (AGM and similar) also work, as long as you have suitable entities available in Home Assistant.
+You need the corresponding entities from your BMS (e.g. Victron, JK-BMS, Daly, Seplos, JBD) that provide the cell voltages in Home Assistant.
+Regular batteries (AGM and similar with 12, 24v or 48v) also work, as long as you have suitable entities available in Home Assistant.
 
 Supported Card languages are English and German. If you need other languages as well, tell me.
 
@@ -43,6 +43,8 @@ If you like this custom card, I would really appreciate a star rating ⭐. Thank
 ### ⚡ **BMS Control & Interactive Elements**
 - **Interactive Status Switches:** Toggle **Charge**, **Discharge**, and **Balance** directly from the card (supports Switches, Input Booleans, and Input Selects)
 - **Custom State Logic:** Define custom values for "On" and "Off" states (e.g., `True`/`False`, `On`/`Off`)
+- **Balance Switch:** for BMS like seplos, tdt BMS, daily or jbd
+- **Balance Sensor:** Define a Balance Sensor for each cell (like JK-BMS)
 - **Click Actions:** Click on sensors, charts, or cells to open the Home Assistant "More Info" dialog
 
 ### 📉 **Statistics & Monitoring**
@@ -66,7 +68,7 @@ If you like this custom card, I would really appreciate a star rating ⭐. Thank
 
 detailed view:
 
-<img width="96%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card-detailed-view.png" />
+<img width="48%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card_one_cell.png" />  <img width="96%" height="auto" alt="image" src="https://github.com/jayjojayson/bms-battery-cells-card/blob/main/docs/bms-battery-cells-card-detailed-view.png" />
 
 ---
 

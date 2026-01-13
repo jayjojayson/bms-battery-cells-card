@@ -24,7 +24,8 @@ export default {
         cells: "Zellen",
         add_cell: "Zelle hinzufügen",
         cell_name: "Name",
-        cell_entity: "Entität",
+        cell_entity: "Spannung Sensor",
+        cell_balance_entity: "Balancer Sensor (opt.)", // NEU
 
         // Detailansicht Optionen
         show_detailed_view: "Detailansicht aktivieren",
@@ -40,7 +41,7 @@ export default {
         
         stat_charge: "Laden (Switch/Input Boolean/Select)",
         stat_discharge: "Entladen (Switch/Input Boolean/Select)",
-        stat_balance: "Balancing (Switch/Input Boolean/Select)",
+        stat_balance: "Balancing Global (Switch/Input Boolean/Select)",
         
         // Custom Values
         val_on: "Wert für ON (z.B. 'Ein' oder 'True')",

@@ -2,7 +2,7 @@ import de from './lang-de.js';
 import en from './lang-en.js';
 
 console.log(
-  "%c🔋 BMS Battery Cells Card v_1.5 loaded",
+  "%c🔋 BMS Battery Cells Card v_1.6 loaded",
   "background: #2ecc71; color: #000; padding: 2px 6px; border-radius: 4px; font-weight: bold;"
 );
 
@@ -41,7 +41,7 @@ class BmsBatteryCellsCard extends HTMLElement {
     static getStubConfig() {
         return {
             title: "Batterie Zellen",
-            cells: Array.from({length: 4}, (_, i) => ({ entity: `sensor.cell_${i+1}`, name: `${i+1}` }))
+            cells: Array.from({length: 4}, (_, i) => ({ entity: `sensor.cell_${i+1}`, name: `${i+1}`, balance_entity: '' }))
         };
     }
 
@@ -339,7 +339,7 @@ class BmsBatteryCellsCard extends HTMLElement {
         cells.forEach((cell, index) => {
             const val = this._parseNumber(cell.entity);
             if (val !== null) {
-                const v = (val > 10) ? val / 1000 : val;
+                const v = (val > 80) ? val / 1000 : val;
                 cellValues[index] = v;
                 if (v < minV) { minV = v; minIdx = index; }
                 if (v > maxV) { maxV = v; maxIdx = index; }
@@ -533,10 +533,17 @@ class BmsBatteryCellsCard extends HTMLElement {
                         }
                     }
                 }
-                let color = '#d32f2f'; 
-                if (displayValNum >= 2.80) color = '#ffa726'; if (displayValNum >= 3.00) color = '#ffd600'; 
-                if (displayValNum >= 3.20) color = '#43a047'; if (displayValNum >= 3.40) color = '#42a5f5'; 
-                if (displayValNum >= 3.45) color = '#1565c0'; if (displayValNum >= 3.55) color = '#ff7043'; 
+                
+                // --- COLOR LOGIC: DYNAMIC BASED ON mapPoints ---
+                let color = '#d32f2f'; // Default Red (Below point 1)
+                
+                if (displayValNum >= mapPoints[1]) color = '#ffa726'; // Orange
+                if (displayValNum >= mapPoints[2]) color = '#ffd600'; // Yellow
+                if (displayValNum >= mapPoints[3]) color = '#43a047'; // Green (Center)
+                if (displayValNum >= mapPoints[4]) color = '#42a5f5'; // Blue
+                if (displayValNum >= mapPoints[5]) color = '#1565c0'; // Dark Blue
+                if (displayValNum >= mapPoints[6]) color = '#ff7043'; // Orange-Red (High)
+
                 if (horizontal_layout) { bar.style.width = `${pct}%`; bar.style.height = '100%'; } else { bar.style.height = `${pct}%`; bar.style.width = '100%'; }
                 bar.style.color = color; 
                 if (isCharging) { bar.classList.add('is-charging'); bar.classList.remove('is-discharging'); }
@@ -544,7 +551,6 @@ class BmsBatteryCellsCard extends HTMLElement {
                 else { bar.classList.remove('is-charging'); bar.classList.remove('is-discharging'); }
                 if (valLabel.innerText !== displayVal) valLabel.innerText = displayVal;
 
-                // --- FIX START: TOOLTIP TEXT AKTUALISIEREN ---
                 if (tooltip) tooltip.innerText = displayVal;
             }
         });
@@ -575,7 +581,6 @@ class BmsBatteryCellsCard extends HTMLElement {
              let scaleLabels = horizontal_layout ? [...mapPoints].map(v=>v.toFixed(2)+'V') : [...mapPoints].reverse().map(v=>v.toFixed(2)+'V');
              let trackGradient = horizontal_layout ? `linear-gradient(to right, #d32f2f 0%, #ef5350 7%, #ffa726 14.28%, #ffd600 28.57%, #43a047 42.85%, #42a5f5 57.14%, #1565c0 71.42%, #ff7043 85.71%, #ff5722 100%)` : `linear-gradient(to top, #d32f2f 0%, #ef5350 7%, #ffa726 14.28%, #ffd600 28.57%, #43a047 42.85%, #42a5f5 57.14%, #1565c0 71.42%, #ff7043 85.71%, #ff5722 100%)`;
              
-             // --- MARGIN-TOP 0px + FIXED HEIGHT ---
              standardCss = `
                 .standard-view-wrapper {
                     display: block; margin-top: 0px; 
@@ -799,7 +804,6 @@ class BmsBatteryCellsCard extends HTMLElement {
             this._updateDetailedValues();
             return;
         }
-        // this._renderStandardView();  <- Diese Zeile verursachte das Flackern!
         this._updateStandardValues();
     }
 
@@ -827,8 +831,6 @@ class BmsBatteryCellsCard extends HTMLElement {
         const addIfConf = (list, confKey, labelKey, unit, isTemp=false, fixed=null) => {
             if (!c[confKey]) return; 
             let val = this._parseNumber(c[confKey]);
-            
-            // --- FIX: Runden, wenn fixed definiert ist ---
             if (val !== null && fixed !== null) {
                 val = val.toFixed(fixed);
             }
@@ -846,7 +848,7 @@ class BmsBatteryCellsCard extends HTMLElement {
         c.cells.forEach((cell, i) => {
             const v = this._parseNumber(cell.entity);
             if (v !== null) {
-                const val = (v > 10) ? v / 1000 : v;
+                const val = (v > 80) ? v / 1000 : v;
                 if (val < minV) { minV = val; minIdx = i; }
                 if (val > maxV) { maxV = val; maxIdx = i; }
                 cellSum += val; cellCnt++;
@@ -855,7 +857,6 @@ class BmsBatteryCellsCard extends HTMLElement {
         const avgVal = cellCnt > 0 ? (cellSum / cellCnt).toFixed(3) + ' V' : '--';
         leftList.push(`<div class="detail-item"><span class="detail-label">${this._localize('card.avg_cell')} :</span><span class="detail-val-txt">${avgVal}</span></div>`);
         
-        // --- Nachkommastelle bei Temperatur hinzugefügt ---
         addIfConf(leftList, 'temp_entity', 'editor.temp', '°C', true, 1);
         
         if (c.capacity_entity && c.soc_entity) {
@@ -909,7 +910,6 @@ class BmsBatteryCellsCard extends HTMLElement {
             el.innerText = isOn ? this._localize('card.on') : this._localize('card.off');
             el.className = `status-val ${isOn ? 'status-on' : 'status-off'}`;
             if(el.parentElement) {
-                // Wenn es Balance ist, checken ob Config da ist, sonst normal interactive
                 if(id === 'd-stat-balance') {
                      if(c.stat_balance_entity) {
                          el.parentElement.classList.add('interactive');
@@ -942,20 +942,29 @@ class BmsBatteryCellsCard extends HTMLElement {
         if (listContainer) {
             let cellListHtml = [[], []];
             
-            // --- Generate HTML List (with knowing Min/Max/Global Bal) ---
+            // --- Generate HTML List (Hybrid Logic) ---
             c.cells.forEach((cell, i) => {
                 const v = this._parseNumber(cell.entity);
                 if (v !== null) {
-                    const val = (v > 10) ? v / 1000 : v;
+                    const val = (v > 80) ? v / 1000 : v;
                     const colIdx = i < Math.ceil(c.cells.length/2) ? 0 : 1;
                     
-                    // --- LOGIC: If Balancing ON AND (IsMax OR IsMin) -> Show Green 'bal. on' ---
-                    let balText = 'bal. off';
-                    let balStyle = ''; // default color from CSS
+                    // --- HYBRID BALANCING LOGIC START ---
+                    let isCellBalancing = false;
                     
-                    if (isBalGlobal && (i === maxIdx || i === minIdx)) {
+                    if (cell.balance_entity) {
+                        const bState = this._getState(cell.balance_entity);
+                        isCellBalancing = isStateOn(bState); 
+                    } else {
+                        isCellBalancing = isBalGlobal && (i === maxIdx || i === minIdx);
+                    }
+                    
+                    let balText = 'bal. off';
+                    let balStyle = ''; 
+                    
+                    if (isCellBalancing) {
                         balText = 'bal. on';
-                        balStyle = 'color: #4caf50; font-weight: bold;'; // Green
+                        balStyle = 'color: #4caf50; font-weight: bold;'; 
                     }
                     
                     cellListHtml[colIdx].push(`<div class="cell-text-row clickable" data-entity="${cell.entity}"><span><span class="cell-num">${String(i+1).padStart(2,'0')}.</span><span class="cell-v">${val.toFixed(3)} V</span></span><span class="cell-bal" style="${balStyle}">${balText}</span></div>`);
@@ -967,7 +976,6 @@ class BmsBatteryCellsCard extends HTMLElement {
         if (this.chartVoltage && vTotal !== null) { this._updateChartData(this.chartVoltage, Date.now(), vTotal); }
         if (this.chartDrift && driftDisplay !== null) { this._updateChartData(this.chartDrift, Date.now(), driftDisplay); }
         
-        // --- UPDATE STANDARD VIEW IN DETAILED VIEW ---
         if (c.show_standard_in_detail) {
             this._updateStandardValues();
         }
