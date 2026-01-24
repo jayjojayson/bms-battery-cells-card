@@ -2,7 +2,7 @@ import de from './lang-de.js';
 import en from './lang-en.js';
 
 console.log(
-  "%c🔋 BMS Battery Cells Card v_1.6 loaded",
+  "%c🔋 BMS Battery Cells Card v_1.7 loaded",
   "background: #2ecc71; color: #000; padding: 2px 6px; border-radius: 4px; font-weight: bold;"
 );
 
@@ -122,16 +122,26 @@ class BmsBatteryCellsCard extends HTMLElement {
         if (!stateObj) return;
         
         const domain = entityId.split('.')[0];
+        
+        // Handle switches, input_booleans, lights
         if (domain === 'switch' || domain === 'input_boolean' || domain === 'light') {
             this._hass.callService("homeassistant", "toggle", { entity_id: entityId });
             return;
         }
-        if (domain === 'input_select') {
-            const current = stateObj.state;
-            const targetOn = customOn && customOn.trim() !== '' ? customOn : 'on';
-            const targetOff = customOff && customOff.trim() !== '' ? customOff : 'off';
+
+        // Handle input_select AND select
+        if (domain === 'input_select' || domain === 'select') {
+            const current = String(stateObj.state).trim();
+            const targetOn = customOn && String(customOn).trim() !== '' ? String(customOn).trim() : 'on';
+            const targetOff = customOff && String(customOff).trim() !== '' ? String(customOff).trim() : 'off';
+            
+            // Logic: If current is targetOn, switch to targetOff, else switch to targetOn
             const nextOption = (current === targetOn) ? targetOff : targetOn;
-            this._hass.callService("input_select", "select_option", { entity_id: entityId, option: nextOption });
+            
+            // Correct service call based on domain
+            const serviceDomain = domain === 'select' ? 'select' : 'input_select';
+            
+            this._hass.callService(serviceDomain, "select_option", { entity_id: entityId, option: nextOption });
         }
     }
 
@@ -815,7 +825,9 @@ class BmsBatteryCellsCard extends HTMLElement {
         // --- HELPER FUNCTION DEFINE FIRST ---
         const isStateOn = (current, customOn) => {
             if (!current) return false;
-            if (customOn && customOn.trim() !== '') { return current === customOn; }
+            if (customOn && String(customOn).trim() !== '') { 
+                return String(current).trim() === String(customOn).trim(); 
+            }
             return (current === 'on' || current === 'true' || current === true || current === 'balancing');
         };
 

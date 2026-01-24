@@ -11,7 +11,7 @@ const ICON_CLOSE = "M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.4
 // Selector Konfiguration für Sensoren
 const sensorSelector = { entity: { domain: "sensor" } };
 const binarySelector = { entity: { domain: ["binary_sensor", "sensor", "input_boolean", "switch"] } };
-const switchSelector = { entity: { domain: ["switch", "input_boolean", "input_select", "binary_sensor"] } };
+const switchSelector = { entity: { domain: ["switch", "input_boolean", "input_select", "binary_sensor", "select"] } };
 
 class BmsBatteryCellsCardEditor extends LitElement {
   constructor() {

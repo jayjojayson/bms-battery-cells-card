@@ -1,0 +1,35 @@
+name: "Release erstellen"
+
+on:
+  push:
+    tags:
+      - "v_*"
+
+jobs:
+  release:
+    name: "Release erstellen und Zippen"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # SCHRITT 1: Zippen mit dynamischem Namen
+      - name: Zip dist folder
+        run: |
+          cd dist
+          zip -r "../bms-battery-cells-card_${{ github.ref_name }}.zip" ./*
+
+      # SCHRITT 2: Genau diese dynamisch benannte Datei hochladen
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          files: bms-battery-cells-card_${{ github.ref_name }}.zip
+          
