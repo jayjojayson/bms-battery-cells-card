@@ -16,13 +16,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      #  Node.js, um den Bundler auszuführen
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # esbuild installieren
       - name: Install esbuild
         run: npm install -g esbuild
 
@@ -31,7 +29,7 @@ jobs:
         run: |
           esbuild dist/bms-battery-cells-card.js --bundle --minify --format=esm --outfile=bms-battery-cells-card.js
 
-      # Release erstellen und die EINE Datei hochladen
+      # UPLOAD
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
@@ -40,3 +38,4 @@ jobs:
           draft: false
           prerelease: false
           files: bms-battery-cells-card.js
+          
