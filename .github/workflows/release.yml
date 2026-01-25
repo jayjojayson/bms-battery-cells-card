@@ -1,4 +1,4 @@
-name: "Release erstellen"
+name: "Release & Bundle"
 
 on:
   push:
@@ -6,8 +6,8 @@ on:
       - "v_*"
 
 jobs:
-  release:
-    name: "Release erstellen und Zippen"
+  build-and-release:
+    name: "Bundeln und Veröffentlichen"
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -16,20 +16,27 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # SCHRITT 1: Zippen mit dynamischem Namen
-      - name: Zip dist folder
-        run: |
-          cd dist
-          zip -r "../bms-battery-cells-card_${{ github.ref_name }}.zip" ./*
+      #  Node.js, um den Bundler auszuführen
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-      # SCHRITT 2: Genau diese dynamisch benannte Datei hochladen
+      # esbuild installieren
+      - name: Install esbuild
+        run: npm install -g esbuild
+
+      # BUNDLING
+      - name: Bundle Javascript
+        run: |
+          esbuild dist/bms-battery-cells-card.js --bundle --minify --format=esm --outfile=bms-battery-cells-card.js
+
+      # Release erstellen und die EINE Datei hochladen
       - name: Create Release
-        id: create_release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           draft: false
           prerelease: false
-          files: bms-battery-cells-card_${{ github.ref_name }}.zip
-          
+          files: bms-battery-cells-card.js
