@@ -498,7 +498,7 @@ function requireChart_umd_min () {
 requireChart_umd_min();
 
 console.log(
-  "%c🔋 BMS Battery Cells Card v_1.8.1 loaded",
+  "%c🔋 BMS Battery Cells Card v_1.8 loaded",
   "background: #2ecc71; color: #000; padding: 2px 6px; border-radius: 4px; font-weight: bold;"
 );
 
