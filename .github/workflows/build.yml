@@ -33,6 +33,6 @@ jobs:
       - name: Commit and Push changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: Auto-build distribution files"
+          commit_message: "BMS-Card Auto-build"
           file_pattern: dist/bms-battery-cells-card.js
           branch: main
