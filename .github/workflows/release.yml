@@ -1,13 +1,13 @@
-name: "Release & Bundle"
+name: "Release"
 
 on:
   push:
     tags:
-      - "v_*"
+      - "v*"
 
 jobs:
-  build-and-release:
-    name: "Bundeln und Veröffentlichen"
+  release:
+    name: "Veröffentlichen"
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -16,20 +16,6 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install esbuild
-        run: npm install -g esbuild
-
-      # BUNDLING
-      - name: Bundle Javascript
-        run: |
-          esbuild dist/bms-battery-cells-card.js --bundle --minify --format=esm --outfile=bms-battery-cells-card.js
-
-      # UPLOAD
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
@@ -37,5 +23,4 @@ jobs:
           name: Release ${{ github.ref_name }}
           draft: false
           prerelease: false
-          files: bms-battery-cells-card.js
-          
+          files: dist/bms-battery-cells-card.js

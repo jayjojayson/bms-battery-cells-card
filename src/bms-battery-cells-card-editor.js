@@ -152,6 +152,33 @@ class BmsBatteryCellsCardEditor extends LitElement {
     this._fireConfigChanged({ ...this._config, cells: newCells });
   }
 
+  _clearValue(key) {
+    if (!this._config) return;
+    this._fireConfigChanged({ ...this._config, [key]: '' });
+  }
+
+  _renderEntitySelector(label, configKey, selector, marginBottom = '8px', marginTop = '0px') {
+    return html`
+        <div class="row" style="margin-bottom: ${marginBottom}; margin-top: ${marginTop}; align-items: center;">
+            <ha-selector 
+                .label="${this._localize(label)}" 
+                .hass=${this.hass} 
+                .selector=${selector} 
+                .value=${this._config[configKey]} 
+                @value-changed=${(e) => this._valueChanged(e, configKey)}
+                style="flex: 1;"
+            ></ha-selector>
+            ${this._config[configKey] ? html`
+                <ha-icon-button 
+                    .path=${ICON_CLOSE} 
+                    @click=${() => this._clearValue(configKey)}
+                    style="color: var(--secondary-text-color); margin-left: 4px;"
+                ></ha-icon-button>
+            ` : ''}
+        </div>
+    `;
+  }
+
   render() {
     if (!this.hass || !this._config) return html``;
     const cells = this._config.cells || [];
@@ -199,12 +226,12 @@ class BmsBatteryCellsCardEditor extends LitElement {
 
         <div>
             <span class="section-header">${this._localize('editor.main_sensors')}</span>
-            <ha-selector .label="${this._localize('editor.soc')}" .hass=${this.hass} .selector=${sensorSelector} .value=${this._config.soc_entity} @value-changed=${(e) => this._valueChanged(e, 'soc_entity')} style="margin-bottom: 8px;"></ha-selector>
-            <ha-selector .label="${this._localize('editor.power')}" .hass=${this.hass} .selector=${sensorSelector} .value=${this._config.watt_entity} @value-changed=${(e) => this._valueChanged(e, 'watt_entity')} style="margin-bottom: 8px;"></ha-selector>
-            <ha-selector .label="${this._localize('editor.voltage')}" .hass=${this.hass} .selector=${sensorSelector} .value=${this._config.total_voltage_entity} @value-changed=${(e) => this._valueChanged(e, 'total_voltage_entity')} style="margin-bottom: 8px;"></ha-selector>
-            <ha-selector .label="${this._localize('editor.current')}" .hass=${this.hass} .selector=${sensorSelector} .value=${this._config.total_current_entity} @value-changed=${(e) => this._valueChanged(e, 'total_current_entity')} style="margin-bottom: 8px;"></ha-selector>
-            <ha-selector .label="${this._localize('editor.drift')}" .hass=${this.hass} .selector=${sensorSelector} .value=${this._config.cell_diff_sensor} @value-changed=${(e) => this._valueChanged(e, 'cell_diff_sensor')} style="margin-bottom: 8px;"></ha-selector>
-            <ha-selector .label="${this._localize('editor.temp')}" .hass=${this.hass} .selector=${sensorSelector} .value=${this._config.temp_entity} @value-changed=${(e) => this._valueChanged(e, 'temp_entity')}></ha-selector>
+            ${this._renderEntitySelector('editor.soc', 'soc_entity', sensorSelector)}
+            ${this._renderEntitySelector('editor.power', 'watt_entity', sensorSelector)}
+            ${this._renderEntitySelector('editor.voltage', 'total_voltage_entity', sensorSelector)}
+            ${this._renderEntitySelector('editor.current', 'total_current_entity', sensorSelector)}
+            ${this._renderEntitySelector('editor.drift', 'cell_diff_sensor', sensorSelector)}
+            ${this._renderEntitySelector('editor.temp', 'temp_entity', sensorSelector)}
         
             ${this._config.show_detailed_view ? html`
                 <div class="detailed-options">
@@ -237,29 +264,29 @@ class BmsBatteryCellsCardEditor extends LitElement {
                         ></ha-switch>
                     </div>
 
-                    <ha-selector .label="${this._localize('editor.stat_charge')}" .hass=${this.hass} .selector=${switchSelector} .value=${this._config.stat_charge_entity} @value-changed=${(e) => this._valueChanged(e, 'stat_charge_entity')} style="margin-bottom: 4px;"></ha-selector>
+                    ${this._renderEntitySelector('editor.stat_charge', 'stat_charge_entity', switchSelector, '4px')}
                     <div class="sub-option">
                          <ha-textfield label="${this._localize('editor.val_on')}" .value=${this._config.stat_charge_on || ''} .configValue=${'stat_charge_on'} @input=${this._valueChanged}></ha-textfield>
                          <ha-textfield label="${this._localize('editor.val_off')}" .value=${this._config.stat_charge_off || ''} .configValue=${'stat_charge_off'} @input=${this._valueChanged}></ha-textfield>
                     </div>
 
-                    <ha-selector .label="${this._localize('editor.stat_discharge')}" .hass=${this.hass} .selector=${switchSelector} .value=${this._config.stat_discharge_entity} @value-changed=${(e) => this._valueChanged(e, 'stat_discharge_entity')} style="margin-bottom: 4px; margin-top: 12px;"></ha-selector>
+                    ${this._renderEntitySelector('editor.stat_discharge', 'stat_discharge_entity', switchSelector, '4px', '12px')}
                     <div class="sub-option">
                          <ha-textfield label="${this._localize('editor.val_on')}" .value=${this._config.stat_discharge_on || ''} .configValue=${'stat_discharge_on'} @input=${this._valueChanged}></ha-textfield>
                          <ha-textfield label="${this._localize('editor.val_off')}" .value=${this._config.stat_discharge_off || ''} .configValue=${'stat_discharge_off'} @input=${this._valueChanged}></ha-textfield>
                     </div>
                     
-                    <ha-selector .label="${this._localize('editor.stat_balance')}" .hass=${this.hass} .selector=${switchSelector} .value=${this._config.stat_balance_entity} @value-changed=${(e) => this._valueChanged(e, 'stat_balance_entity')} style="margin-bottom: 8px; margin-top: 12px;"></ha-selector>
+                    ${this._renderEntitySelector('editor.stat_balance', 'stat_balance_entity', switchSelector, '8px', '12px')}
                     <div class="sub-option">
                          <ha-textfield label="${this._localize('editor.val_on')}" .value=${this._config.stat_balance_on || ''} .configValue=${'stat_balance_on'} @input=${this._valueChanged}></ha-textfield>
                          <ha-textfield label="${this._localize('editor.val_off')}" .value=${this._config.stat_balance_off || ''} .configValue=${'stat_balance_off'} @input=${this._valueChanged}></ha-textfield>
                     </div>
                     
-                    <ha-selector .label="${this._localize('editor.soh')}" .hass=${this.hass} .selector=${sensorSelector} .value=${this._config.soh_entity} @value-changed=${(e) => this._valueChanged(e, 'soh_entity')} style="margin-bottom: 8px;"></ha-selector>
-                    <ha-selector .label="${this._localize('editor.capacity')}" .hass=${this.hass} .selector=${sensorSelector} .value=${this._config.capacity_entity} @value-changed=${(e) => this._valueChanged(e, 'capacity_entity')} style="margin-bottom: 8px;"></ha-selector>
-                    <ha-selector .label="${this._localize('editor.cycle_capacity')}" .hass=${this.hass} .selector=${sensorSelector} .value=${this._config.cycle_capacity_entity} @value-changed=${(e) => this._valueChanged(e, 'cycle_capacity_entity')} style="margin-bottom: 8px;"></ha-selector>
-                    <ha-selector .label="${this._localize('editor.cycles')}" .hass=${this.hass} .selector=${sensorSelector} .value=${this._config.cycle_count_entity} @value-changed=${(e) => this._valueChanged(e, 'cycle_count_entity')} style="margin-bottom: 8px;"></ha-selector>
-                    <ha-selector .label="${this._localize('editor.temp_mos')}" .hass=${this.hass} .selector=${sensorSelector} .value=${this._config.temp_mos_entity} @value-changed=${(e) => this._valueChanged(e, 'temp_mos_entity')}></ha-selector>
+                    ${this._renderEntitySelector('editor.soh', 'soh_entity', sensorSelector)}
+                    ${this._renderEntitySelector('editor.capacity', 'capacity_entity', sensorSelector)}
+                    ${this._renderEntitySelector('editor.cycle_capacity', 'cycle_capacity_entity', sensorSelector)}
+                    ${this._renderEntitySelector('editor.cycles', 'cycle_count_entity', sensorSelector)}
+                    ${this._renderEntitySelector('editor.temp_mos', 'temp_mos_entity', sensorSelector)}
                 </div>
             ` : ''}
         </div>

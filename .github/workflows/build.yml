@@ -1,0 +1,38 @@
+name: Build and Commit
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'rollup.config.mjs'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Commit and Push changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: Auto-build distribution files"
+          file_pattern: dist/bms-battery-cells-card.js
+          branch: main
