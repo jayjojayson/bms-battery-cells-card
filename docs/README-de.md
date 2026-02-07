@@ -1,7 +1,7 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Default%20✔-brightgreen.svg)](https://github.com/hacs/plugin)
 [![HACS validation](https://img.shields.io/github/actions/workflow/status/jayjojayson/bms-battery-cells-card/validate.yml?label=HACS%20Validation)](https://github.com/jayjojayson/bms-battery-cells-card/actions?query=workflow%3Avalidate)
 [![GitHub release](https://img.shields.io/github/release/jayjojayson/bms-battery-cells-card?include_prereleases=&sort=semver&color=blue)](https://github.com/jayjojayson/bms-battery-cells-card/releases/)
-![File size](https://img.shields.io/github/size/jayjojayson/bms-battery-cells-card/dist/bms-battery-cells-card.js?label=Card%20Size)
+![Downloads](https://img.shields.io/github/downloads/jayjojayson/bms-battery-cells-card/total?label=Downloads&color=blue)
 ![last commit](https://img.shields.io/github/last-commit/jayjojayson/bms-battery-cells-card)
 [![README English](https://img.shields.io/badge/README-Eng-orange)](https://github.com/jayjojayson/bms-battery-cells-card/blob/main/README.md)
 [![stars](https://img.shields.io/github/stars/jayjojayson/bms-battery-cells-card)](https://github.com/jayjojayson/bms-battery-cells-card/stargazers)
