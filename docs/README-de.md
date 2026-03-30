@@ -150,28 +150,34 @@ Obwohl die UI-Konfiguration empfohlen wird, kann die Karte auch manuell über de
 
 ### Optionen
 
-| name                 | typ       | erforderlich | Beschreibung                                                    | Standard            |
-| -------------------- | --------- | ------------ | --------------------------------------------------------------- | ------------------- |
-| `type`               | `string`  | Ja           | Kartentyp. Muss `custom:bms-battery-cells-card` sein.           |                     |
-| `title`              | `string`  | Nein         | Titel, der oben in der Karte angezeigt wird.                    | `"Batterie Zellen"` |
-| `cells`              | `list`    | Ja           | Liste der Zellen (jeweils mit Entität und optionalem Namen).    | 4 Beispiel-Zellen   |
-| `cells[].entity`     | `string`  | Ja           | Sensor-Entität der Zellspannung.                                |                     |
-| `cells[].name`       | `string`  | Nein         | Anzeigename der Zelle.                                          | Zell-Index          |
-| `show_legend`        | `boolean` | Nein         | Zeigt die Spannungs-Skala (Y-Achse) auf der linken Seite an.    | `true`              |
-| `container_padding`  | `number`  | Nein         | Innenabstand des Karten-Containers in Pixeln.                   | `16`                |
-| `card_height`        | `number`  | Nein         | Feste Höhe der Karte in Pixeln.                                 | `380`               |
-| `cell_gap`           | `number`  | Nein         | Abstand zwischen einzelnen Zellen in Pixeln.                    | `4`                 |
-| `show_values`        | `boolean` | Nein         | Zeigt die exakten Zellspannungen als Text an.                   | `true`              |
-| `show_values_on_top` | `boolean` | Nein         | Zeigt Statistikwerte oberhalb der Icons an.                     | `false`             |
-| `enable_animations`  | `boolean` | Nein         | Aktiviert Lade- und Entlade-Animationen.                        | `true`              |
-| `min_voltage`        | `number`  | Nein         | Minimale Zellspannung für die Skalierung.                       | `2.60`              |
-| `max_voltage`        | `number`  | Nein         | Maximale Zellspannung für die Skalierung.                       | `3.65`              |
-| `show_min_max`       | `boolean` | Nein         | Markiert die Zellen mit minimaler und maximaler Spannung.       | `true`              |
-| `show_average`       | `boolean` | Nein         | Zeigt die durchschnittliche Zellspannung in den Statistiken an. | `false`             |
-| `soc_entity`         | `string`  | Nein         | Sensor-Entität für den Ladezustand (SoC).                       |                     |
-| `watt_entity`        | `string`  | Nein         | Leistungs-Sensor (positiv = Laden, negativ = Entladen).         |                     |
-| `cell_diff_sensor`   | `string`  | Nein         | Sensor für die Zellspannungs-Abweichung (mV).                   |                     |
-| `temp_entity`        | `string`  | Nein         | Sensor-Entität für die Batterietemperatur.                      |                     |
+| name                      | typ       | erforderlich | Beschreibung                                                    | Standard            |
+| ------------------------- | --------- | ------------ | --------------------------------------------------------------- | ------------------- |
+| `type`                    | `string`  | Ja           | Kartentyp. Muss `custom:bms-battery-cells-card` sein.           |                     |
+| `title`                   | `string`  | Nein         | Titel, der oben in der Karte angezeigt wird.                    | `"Batterie Zellen"` |
+| `cells`                   | `list`    | Ja           | Liste der Zellen (jeweils mit Entität und optionalem Namen).    | 4 Beispiel-Zellen   |
+| `cells[].entity`          | `string`  | Ja           | Sensor-Entität der Zellspannung.                                |                     |
+| `cells[].name`            | `string`  | Nein         | Anzeigename der Zelle.                                          | Zell-Index          |
+| `show_legend`             | `boolean` | Nein         | Zeigt die Spannungs-Skala (Y-Achse) auf der linken Seite an.    | `true`              |
+| `container_padding`       | `number`  | Nein         | Innenabstand des Karten-Containers in Pixeln.                   | `16`                |
+| `card_height`             | `number`  | Nein         | Feste Höhe der Karte in Pixeln.                                 | `380`               |
+| `cell_gap`                | `number`  | Nein         | Abstand zwischen einzelnen Zellen in Pixeln.                    | `4`                 |
+| `show_values`             | `boolean` | Nein         | Zeigt die exakten Zellspannungen als Text an.                   | `true`              |
+| `show_values_on_top`      | `boolean` | Nein         | Zeigt Statistikwerte oberhalb der Icons an.                     | `false`             |
+| `enable_animations`       | `boolean` | Nein         | Aktiviert Lade- und Entlade-Animationen.                        | `true`              |
+| `min_voltage`             | `number`  | Nein         | Minimale Zellspannung für die Skalierung.                       | `2.60`              |
+| `max_voltage`             | `number`  | Nein         | Maximale Zellspannung für die Skalierung.                       | `3.65`              |
+| `show_min_max`            | `boolean` | Nein         | Markiert die Zellen mit minimaler und maximaler Spannung.       | `true`              |
+| `show_average`            | `boolean` | Nein         | Zeigt die durchschnittliche Zellspannung in den Statistiken an. | `false`             |
+| `cell_background_color`   | `string`  | Nein         | Zell Hintergrundfarbe: `gradient` oder CSS-Farbwert.            | `gradient`          |
+| `cell_background_opacity` | `number`  | Nein         | Zellhintergrund-Opacity (0.0-1.0).                              | `0.25`              |
+| `cell_bar_color`          | `string`  | Nein         | Balkenfarbe: `range`, `delta` oder HEX-Farbwert (custom).       | `range`             |
+| `cell_bar_opacity`        | `number`  | Nein         | Balken-Opacity (0.0-1.0).                                       | `0.6`               |
+| `cell_bar_top_color`      | `string`  | Nein         | Balken-Oberfarbe für `delta` (Hex).                             | `#173117`           |
+| `cell_bar_bottom_color`   | `string`  | Nein         | Balken-Unterfarbe für `delta` (Hex).                            | `#3c2222`           |
+| `soc_entity`              | `string`  | Nein         | Sensor-Entität für den Ladezustand (SoC).                       |                     |
+| `watt_entity`             | `string`  | Nein         | Leistungs-Sensor (positiv = Laden, negativ = Entladen).         |                     |
+| `cell_diff_sensor`        | `string`  | Nein         | Sensor für die Zellspannungs-Abweichung (mV).                   |                     |
+| `temp_entity`             | `string`  | Nein         | Sensor-Entität für die Batterietemperatur.                      |                     |
 
 ### Beispielkonfiguration
 
@@ -206,6 +212,12 @@ cells:
     entity: sensor.vrm_minimum_cell_voltage_batt_2
 soc_entity: sensor.victron_system_battery_soc
 watt_entity: sensor.vrm_battery_power_batt_1024
+cell_background_color: "gradient"
+cell_background_opacity: 0.28
+cell_bar_color: "delta"
+cell_bar_opacity: 0.75
+cell_bar_top_color: "#13a826"
+cell_bar_bottom_color: "#941414"
 cell_diff_sensor: sensor.vrm_minimum_cell_voltage_batt_1
 temp_entity: sensor.vrm_battery_temperature_batt_1
 show_values_on_top: false

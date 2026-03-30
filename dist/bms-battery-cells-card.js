@@ -26,6 +26,12 @@ var de = {
         cell_name: "Name",
         cell_entity: "Spannung Sensor",
         cell_balance_entity: "Balancer Sensor (opt.)", // NEU
+        cell_background_color: "Hintergrund-Farbe Zellbalken: 'gradient' oder Hex-Farbe",
+        cell_background_opacity: "Hintergrund-Deckkraft (0.0 - 1.0)",
+        cell_bar_color: "Balkenfarbe-Modus ('range', 'delta' oder Farbe)",
+        cell_bar_opacity: "Balken-Deckkraft (0.0 - 1.0)",
+        cell_bar_top_color: "Balkenoberfarbe (Hex, für delta-Modus)",
+        cell_bar_bottom_color: "Balkenunterfarbe (Hex, für delta-Modus)",
 
         // Detailansicht Optionen
         show_detailed_view: "Detailansicht aktivieren",
@@ -102,7 +108,13 @@ var en = {
         cell_name: "Name",
         cell_entity: "Voltage Entity",
         cell_balance_entity: "Balancer Entity (opt.)", // NEU
-        
+        cell_background_color: "Cell background: 'gradient' or hex color",
+        cell_background_opacity: "Cell background opacity (0.0 - 1.0)",
+        cell_bar_color: "Cell bar color mode ('range', 'delta', or color)",
+        cell_bar_opacity: "Cell bar opacity (0.0 - 1.0)",
+        cell_bar_top_color: "Bar top color (hex, for delta mode)",
+        cell_bar_bottom_color: "Bar bottom color (hex, for delta mode)",
+
         // Detailed View Options
         show_detailed_view: "Enable Detailed View",
         show_cell_list: "Show Cell Voltage List", 
@@ -150,14 +162,14 @@ var en = {
     }
 };
 
-// Helper um LitElement sicher zu laden
+// Helper to make sure LitElement is loaded
 const LitElement = customElements.get("ha-lit-element") || Object.getPrototypeOf(customElements.get("home-assistant-main"));
 const html = LitElement.prototype.html;
 const css = LitElement.prototype.css;
 
 const ICON_CLOSE = "M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z";
 
-// Selector Konfiguration für Sensoren
+// Sensor Selector Configuration for entity pickers
 const sensorSelector = { entity: { domain: "sensor" } };
 const binarySelector = { entity: { domain: ["binary_sensor", "sensor", "input_boolean", "switch"] } };
 const switchSelector = { entity: { domain: ["switch", "input_boolean", "input_select", "binary_sensor", "select"] } };
@@ -370,6 +382,17 @@ class BmsBatteryCellsCardEditor extends LitElement {
                 <div class="row"><span>${this._localize('editor.show_min_max')}</span><ha-switch .checked=${this._config.show_min_max !== false} .configValue=${'show_min_max'} @change=${this._valueChanged}></ha-switch></div>
                 <div class="row"><span>${this._localize('editor.show_average')}</span><ha-switch .checked=${this._config.show_average || false} .configValue=${'show_average'} @change=${this._valueChanged}></ha-switch></div>
                 <div class="row"><span>${this._localize('editor.calc_delta')}</span><ha-switch .checked=${this._config.show_voltage_diff || false} .configValue=${'show_voltage_diff'} @change=${this._valueChanged}></ha-switch></div>
+
+                <div class="row"><ha-textfield label="${this._localize('editor.cell_background_color')}" .value=${this._config.cell_background_color ?? 'gradient'} .configValue=${'cell_background_color'} @input=${this._valueChanged}></ha-textfield></div>
+                <div class="row"><ha-textfield label="${this._localize('editor.cell_background_opacity')}" type="number" step="0.05" min="0" max="1" .value=${this._config.cell_background_opacity ?? 0.25} .configValue=${'cell_background_opacity'} @input=${this._valueChanged}></ha-textfield></div>
+
+                <div class="row"><ha-textfield label="${this._localize('editor.cell_bar_color')}" .value=${this._config.cell_bar_color ?? 'range'} .configValue=${'cell_bar_color'} @input=${this._valueChanged}></ha-textfield></div>
+                ${this._config.cell_bar_color === 'delta' ? html`
+                  <div class="row"><ha-textfield label="${this._localize('editor.cell_bar_top_color')}" .value=${this._config.cell_bar_top_color ?? '#173117'} .configValue=${'cell_bar_top_color'} @input=${this._valueChanged}></ha-textfield></div>
+                  <div class="row"><ha-textfield label="${this._localize('editor.cell_bar_bottom_color')}" .value=${this._config.cell_bar_bottom_color ?? '#3c2222'} .configValue=${'cell_bar_bottom_color'} @input=${this._valueChanged}></ha-textfield></div>
+                ` : ''}
+
+                <div class="row"><ha-textfield label="${this._localize('editor.cell_bar_opacity')}" type="number" step="0.05" min="0" max="1" .value=${this._config.cell_bar_opacity ?? 0.6} .configValue=${'cell_bar_opacity'} @input=${this._valueChanged}></ha-textfield></div>
             ` : ''}
         </div>
 
@@ -502,7 +525,7 @@ console.log(
   "background: #2ecc71; color: #000; padding: 2px 6px; border-radius: 4px; font-weight: bold;"
 );
 
-// Helper um sicherzustellen, dass HA-Komponenten verfügbar sind
+// Helper for making sure that HA-Components are loaded
 const loadCardHelpers = async () => {
   if (window.loadCardHelpers) return window.loadCardHelpers();
   if (customElements.get("hui-view")) {
@@ -570,6 +593,15 @@ class BmsBatteryCellsCard extends HTMLElement {
             show_cell_list: true,
             show_charts: true,
             show_standard_in_detail: false,
+            cell_background_color: 'gradient',  // 'gradient' or color string
+            cell_background_opacity: 0.25,      // 0.0 - 1.0
+            cell_bar_color: 'range',            // 'range': uses dynamic color to visualize cell voltage
+                                                // 'delta': uses dynamic color between cell_bar_top_color 
+                                                //          and cell_bar_bottom_color based on deltaV
+                                                // color name or hex color string for a static color
+            cell_bar_opacity: 0.6,              // 0.0 - 1.0
+            cell_bar_top_color: '#173117',    // hex color string, used if cell_bar_color is 'delta'
+            cell_bar_bottom_color: '#3c2222', // hex color string, used if cell_bar_color is 'delta'
             ...config
         };
         this._initialized = false;
@@ -741,12 +773,18 @@ class BmsBatteryCellsCard extends HTMLElement {
     // STANDARD VIEW
     // =========================================================================
     _renderStandardView() {
-        const { title, cells = [], card_height, cell_gap, show_values, min_voltage, max_voltage, thicker_borders, hide_bars, horizontal_layout, show_as_table } = this._config;
+        const { title, cells = [], card_height, cell_gap, show_values, min_voltage, max_voltage, thicker_borders, hide_bars, horizontal_layout, show_as_table, cell_bar_opacity, cell_background_opacity } = this._config;
         const colors = this._getColors();
         const cellCount = cells.length;
         let valDisplay = show_values ? 'inline-block' : 'none';
-        let nameFontSize = '10px'; let namePadding = '2px 6px'; let borderWidth = thicker_borders ? '2px' : '1px';
-        if (cellCount > 10) { valDisplay = 'none'; nameFontSize = '9px'; namePadding = '1px 3px'; }
+        let nameFontSize = '10px';
+        let namePadding = '2px 6px';
+        let borderWidth = thicker_borders ? '2px' : '1px';
+        if (cellCount > 10) {
+            valDisplay = 'none';
+            nameFontSize = '9px';
+            namePadding = '1px 3px';
+        }
 
         const isStandard = (Math.abs(min_voltage - 2.60) < 0.01 && Math.abs(max_voltage - 3.65) < 0.01);
         let mapPoints = isStandard ? [2.60, 2.80, 3.00, 3.20, 3.40, 3.45, 3.55, 3.65] : [];
@@ -754,8 +792,7 @@ class BmsBatteryCellsCard extends HTMLElement {
             const range = max_voltage - min_voltage; const step = range / 7;
             for (let i = 0; i <= 7; i++) mapPoints.push(Math.round((min_voltage + (step * i)) * 1000) / 1000);
         }
-        let scaleLabels = horizontal_layout ? [...mapPoints].map(v=>v.toFixed(2)+'V') : [...mapPoints].reverse().map(v=>v.toFixed(2)+'V');
-        let trackGradient = horizontal_layout ? `linear-gradient(to right, #d32f2f 0%, #ef5350 7%, #ffa726 14.28%, #ffd600 28.57%, #43a047 42.85%, #42a5f5 57.14%, #1565c0 71.42%, #ff7043 85.71%, #ff5722 100%)` : `linear-gradient(to top, #d32f2f 0%, #ef5350 7%, #ffa726 14.28%, #ffd600 28.57%, #43a047 42.85%, #42a5f5 57.14%, #1565c0 71.42%, #ff7043 85.71%, #ff5722 100%)`;
+        let scaleLabels = horizontal_layout ? [...mapPoints].map(v=>v.toFixed(2)+'V') : [...mapPoints].reverse().map(v => v.toFixed(2) + 'V');
 
         const style = `
             <style>
@@ -785,8 +822,8 @@ class BmsBatteryCellsCard extends HTMLElement {
                 .cell-wrapper.cell-item.max-cell { box-shadow: 0 0 8px rgba(244, 67, 54, 0.6) inset; border: 1px solid rgba(244, 67, 54, 0.5); }
                 .custom-tooltip { position: absolute; top: 20%; left: 50%; transform: translateX(-50%); background: rgba(30, 30, 30, 0.95); color: white; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; pointer-events: none; opacity: 0; transition: opacity 0.2s ease-in-out; z-index: 20; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
                 .cell-wrapper:hover .custom-tooltip, .cell-wrapper.show-tooltip .custom-tooltip { opacity: 1; }
-                .cell-track-bg { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: ${trackGradient}; opacity: 0.25; z-index: 0; border-radius: 6px; overflow: hidden; }
-                .cell-bar { position: absolute; ${horizontal_layout ? 'top: 0; bottom: 0; left: 0;' : 'bottom: 0; left: 0; right: 0;'} background: currentColor; ${horizontal_layout ? 'border-right: var(--bar-border-width) solid rgba(255,255,255,0.6);' : 'border-top: var(--bar-border-width) solid rgba(255,255,255,0.6);'} z-index: 1; transition: var(--bar-transition); ${horizontal_layout ? 'border-radius: 0 4px 4px 0;' : 'border-radius: 4px 4px 0 0;'} opacity: 0.3; box-shadow: 0 -2px 8px rgba(0,0,0,0.3); overflow: hidden; }
+                .cell-track-bg { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: ${this._getCellBackground()}; opacity: ${cell_background_opacity}; z-index: 0; border-radius: 6px; overflow: hidden; }
+                .cell-bar { position: absolute; ${horizontal_layout ? 'top: 0; bottom: 0; left: 0;' : 'bottom: 0; left: 0; right: 0;'} background: pink; ${horizontal_layout ? 'border-right: var(--bar-border-width) solid rgba(255, 255, 255, 0.6);' : 'border-top: var(--bar-border-width) solid rgba(255, 255, 255, 0.6);'} z-index: 1; transition: var(--bar-transition); ${horizontal_layout ? 'border-radius: 0 4px 4px 0;' : 'border-radius: 4px 4px 0 0;'} opacity: ${cell_bar_opacity}; box-shadow: 0 -2px 8px rgba(0,0,0,0.3); overflow: hidden; }
                 .cell-bar.is-charging .charging-overlay { opacity: 1; animation: ${horizontal_layout ? 'shimmer-move-right' : 'shimmer-move-up'} 2s infinite linear; }
                 @keyframes shimmer-move-up { 0% { transform: translateY(100%); } 100% { transform: translateY(-100%); } } @keyframes shimmer-move-right { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
                 .charging-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to ${horizontal_layout ? 'right' : 'top'}, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 40%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0.15) 60%, rgba(255,255,255,0) 100%); z-index: 2; transform: ${horizontal_layout ? 'translateX(-100%)' : 'translateY(100%)'}; opacity: 0; pointer-events: none; }
@@ -810,17 +847,23 @@ class BmsBatteryCellsCard extends HTMLElement {
         this.shadowRoot.innerHTML = style + html;
         this._setupTooltips();
     }
-    _renderCellHtml(cell, index) { return `<div class="cell-wrapper cell-item" id="cell-wrap-${index}"><div class="custom-tooltip" id="tooltip-${index}">-</div><div class="cell-track-bg"></div><div class="cell-bar" id="bar-${index}" style="height: 0%; width: 0%;"><div class="charging-overlay"></div></div><div class="cell-info-layer">${this._config.horizontal_layout ? `<div class="cell-name-wrap"><span class="cell-name-badge">${cell.name}</span></div><div class="cell-val-wrap"><span class="cell-val-badge cell-voltage" id="val-${index}">-</span></div>` : `<div class="cell-val-wrap"><span class="cell-val-badge cell-voltage" id="val-${index}">-</span></div><div class="cell-name-wrap"><span class="cell-name-badge">${cell.name}</span></div>`}</div></div>`; }
-    _setupTooltips() { const wrappers = this.shadowRoot.querySelectorAll('.cell-wrapper'); wrappers.forEach(el => { el.addEventListener('click', (e) => { e.stopPropagation(); wrappers.forEach(w => { if(w !== el) w.classList.remove('show-tooltip'); }); el.classList.toggle('show-tooltip'); }); }); document.addEventListener('click', () => { wrappers.forEach(w => w.classList.remove('show-tooltip')); }); }
+
+    _renderCellHtml(cell, index) {
+        return `<div class="cell-wrapper cell-item" id="cell-wrap-${index}"><div class="custom-tooltip" id="tooltip-${index}">-</div><div class="cell-track-bg"></div><div class="cell-bar" id="bar-${index}" style="height: 0%; width: 0%;"><div class="charging-overlay"></div></div><div class="cell-info-layer">${this._config.horizontal_layout ? `<div class="cell-name-wrap"><span class="cell-name-badge">${cell.name}</span></div><div class="cell-val-wrap"><span class="cell-val-badge cell-voltage" id="val-${index}">-</span></div>` : `<div class="cell-val-wrap"><span class="cell-val-badge cell-voltage" id="val-${index}">-</span></div><div class="cell-name-wrap"><span class="cell-name-badge">${cell.name}</span></div>`}</div></div>`;
+    }
+
+    _setupTooltips() {
+        const wrappers = this.shadowRoot.querySelectorAll('.cell-wrapper'); wrappers.forEach(el => { el.addEventListener('click', (e) => { e.stopPropagation(); wrappers.forEach(w => { if (w !== el) w.classList.remove('show-tooltip'); }); el.classList.toggle('show-tooltip'); }); }); document.addEventListener('click', () => { wrappers.forEach(w => w.classList.remove('show-tooltip')); });
+    }
 
     _updateStandardValues() {
-        const { cells = [], watt_entity, soc_entity, cell_diff_sensor, temp_entity, total_voltage_entity, total_current_entity, show_values_on_top, show_min_max, min_voltage, max_voltage, horizontal_layout, show_voltage_diff, show_average, hide_bars, show_as_table } = this._config;
+        const { cells = [], watt_entity, soc_entity, cell_diff_sensor, temp_entity, total_voltage_entity, total_current_entity, show_values, show_values_on_top, show_min_max, min_voltage, max_voltage, horizontal_layout, show_voltage_diff, show_average, hide_bars, show_as_table, cell_bar_color, cell_bar_top_color, cell_bar_bottom_color } = this._config;
         
         const rowClass = show_values_on_top ? 'stat-value-row vertical-layout' : 'stat-value-row';
 
         const wattVal = this._parseNumber(watt_entity);
-        const isCharging = (this._config.enable_animations !== false) && (wattVal !== null && wattVal > 0);
-        const isDischarging = (this._config.enable_animations !== false) && (wattVal !== null && wattVal < 0);
+        (this._config.enable_animations !== false) && (wattVal !== null && wattVal > 0);
+        (this._config.enable_animations !== false) && (wattVal !== null && wattVal < 0);
         
         let minV = 999, maxV = -999, minIdx = -1, maxIdx = -1, cellValues = [];
         cells.forEach((cell, index) => {
@@ -828,8 +871,14 @@ class BmsBatteryCellsCard extends HTMLElement {
             if (val !== null) {
                 const v = (val > 80) ? val / 1000 : val;
                 cellValues[index] = v;
-                if (v < minV) { minV = v; minIdx = index; }
-                if (v > maxV) { maxV = v; maxIdx = index; }
+                if (v < minV) {
+                    minV = v;
+                    minIdx = index;
+                }
+                if (v > maxV) {
+                    maxV = v;
+                    maxIdx = index;
+                }
             }
         });
 
@@ -1021,23 +1070,44 @@ class BmsBatteryCellsCard extends HTMLElement {
                     }
                 }
                 
-                // --- COLOR LOGIC: DYNAMIC BASED ON mapPoints ---
-                let color = '#d32f2f'; // Default Red (Below point 1)
+                // --- COLOR LOGIC ---
+                let color = '#363694'; // DEBUG Default
+                if (cell_bar_color === 'delta') { // Dynamic Color based on delta
+                    color = this._lerpColor(cell_bar_bottom_color, cell_bar_top_color, displayValNum, minV, maxV);
+                    //console.log('Delta Color:', { displayValNum, minV, maxV, color });
+                }
+                else if (cell_bar_color === 'range') { // Dynamic Color based on mapPoints
+                    color = '#d32f2f'; // Default Red (Below point 1)
+                    if (displayValNum >= mapPoints[6]) color = '#ff7043'; // Orange-Red (High)
+                    else if (displayValNum >= mapPoints[5]) color = '#1565c0'; // Dark Blue
+                    else if (displayValNum >= mapPoints[4]) color = '#42a5f5'; // Blue
+                    else if (displayValNum >= mapPoints[3]) color = '#43a047'; // Green (Center)
+                    else if (displayValNum >= mapPoints[2]) color = '#ffd600'; // Yellow
+                    else if (displayValNum >= mapPoints[1]) color = '#ffa726'; // Orange 
+                }
+                else { // Static Color 
+                    color = cell_bar_color;
+                }
+                bar.style.background = color;
                 
-                if (displayValNum >= mapPoints[1]) color = '#ffa726'; // Orange
-                if (displayValNum >= mapPoints[2]) color = '#ffd600'; // Yellow
-                if (displayValNum >= mapPoints[3]) color = '#43a047'; // Green (Center)
-                if (displayValNum >= mapPoints[4]) color = '#42a5f5'; // Blue
-                if (displayValNum >= mapPoints[5]) color = '#1565c0'; // Dark Blue
-                if (displayValNum >= mapPoints[6]) color = '#ff7043'; // Orange-Red (High)
+                // --- BAR SIZE LOGIC ---
+                if (horizontal_layout) {
+                    bar.style.width = `${pct}%`;
+                    bar.style.height = '100%';
+                } else {
+                    bar.style.width = '100%';
+                    bar.style.height = `${pct}%`;
+                }
 
-                if (horizontal_layout) { bar.style.width = `${pct}%`; bar.style.height = '100%'; } else { bar.style.height = `${pct}%`; bar.style.width = '100%'; }
-                bar.style.color = color; 
-                if (isCharging) { bar.classList.add('is-charging'); bar.classList.remove('is-discharging'); }
-                else if (isDischarging) { bar.classList.remove('is-charging'); bar.classList.add('is-discharging'); }
-                else { bar.classList.remove('is-charging'); bar.classList.remove('is-discharging'); }
-                if (valLabel.innerText !== displayVal) valLabel.innerText = displayVal;
-
+                // --- BAR ANIMATION LOGIC ---
+                const isCharging = cell.charge_state === 'Charging';
+                const isDischarging = cell.charge_state === 'Discharging';
+                bar.classList.remove('is-charging', 'is-discharging');
+                if      (isCharging)    bar.classList.add('is-charging');
+                else if (isDischarging) bar.classList.add('is-discharging');
+                
+                // --- VALUE LOGIC ---
+                valLabel.innerText = displayVal;
                 if (tooltip) tooltip.innerText = displayVal;
             }
         });
@@ -1046,7 +1116,8 @@ class BmsBatteryCellsCard extends HTMLElement {
     // DETAILED VIEW (Dashboard)
     // =========================================================================
     _renderDetailedView() {
-        const { cells = [], show_cell_list, show_charts, show_standard_in_detail, card_height, cell_gap, show_values, min_voltage, max_voltage, thicker_borders, hide_bars, horizontal_layout, show_as_table } = this._config;
+        
+        const { cells = [], show_cell_list, show_charts, show_standard_in_detail, card_height, cell_gap, show_values, min_voltage, max_voltage, thicker_borders, hide_bars, horizontal_layout, show_as_table, cell_bar_opacity, cell_background_opacity } = this._config;
         const colors = this._getColors();
         
         // --- LOGIK FÜR STANDARD ANSICHT KOPIEREN (falls aktiviert) ---
@@ -1066,7 +1137,6 @@ class BmsBatteryCellsCard extends HTMLElement {
                  for (let i = 0; i <= 7; i++) mapPoints.push(Math.round((min_voltage + (step * i)) * 1000) / 1000);
              }
              let scaleLabels = horizontal_layout ? [...mapPoints].map(v=>v.toFixed(2)+'V') : [...mapPoints].reverse().map(v=>v.toFixed(2)+'V');
-             let trackGradient = horizontal_layout ? `linear-gradient(to right, #d32f2f 0%, #ef5350 7%, #ffa726 14.28%, #ffd600 28.57%, #43a047 42.85%, #42a5f5 57.14%, #1565c0 71.42%, #ff7043 85.71%, #ff5722 100%)` : `linear-gradient(to top, #d32f2f 0%, #ef5350 7%, #ffa726 14.28%, #ffd600 28.57%, #43a047 42.85%, #42a5f5 57.14%, #1565c0 71.42%, #ff7043 85.71%, #ff5722 100%)`;
              
              standardCss = `
                 .standard-view-wrapper {
@@ -1088,8 +1158,8 @@ class BmsBatteryCellsCard extends HTMLElement {
                 .cell-wrapper.cell-item.max-cell { box-shadow: 0 0 8px rgba(244, 67, 54, 0.6) inset; border: 1px solid rgba(244, 67, 54, 0.5); }
                 .custom-tooltip { position: absolute; top: 20%; left: 50%; transform: translateX(-50%); background: rgba(30, 30, 30, 0.95); color: white; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; pointer-events: none; opacity: 0; transition: opacity 0.2s ease-in-out; z-index: 20; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
                 .cell-wrapper:hover .custom-tooltip, .cell-wrapper.show-tooltip .custom-tooltip { opacity: 1; }
-                .cell-track-bg { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: ${trackGradient}; opacity: 0.25; z-index: 0; border-radius: 6px; overflow: hidden; }
-                .cell-bar { position: absolute; ${horizontal_layout ? 'top: 0; bottom: 0; left: 0;' : 'bottom: 0; left: 0; right: 0;'} background: currentColor; ${horizontal_layout ? 'border-right: var(--bar-border-width) solid rgba(255,255,255,0.6);' : 'border-top: var(--bar-border-width) solid rgba(255,255,255,0.6);'} z-index: 1; transition: var(--bar-transition); ${horizontal_layout ? 'border-radius: 0 4px 4px 0;' : 'border-radius: 4px 4px 0 0;'} opacity: 0.3; box-shadow: 0 -2px 8px rgba(0,0,0,0.3); overflow: hidden; }
+                .cell-track-bg { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: ${this._getCellBackground()}; opacity: ${cell_background_opacity}; z-index: 0; border-radius: 6px; overflow: hidden; }
+                .cell-bar { position: absolute; ${horizontal_layout ? 'top: 0; bottom: 0; left: 0;' : 'bottom: 0; left: 0; right: 0;'} background: pink; ${horizontal_layout ? 'border-right: var(--bar-border-width) solid rgba(255, 255, 255, 0.6);' : 'border-top: var(--bar-border-width) solid rgba(255, 255, 255, 0.6);'} z-index: 1; transition: var(--bar-transition); ${horizontal_layout ? 'border-radius: 0 4px 4px 0;' : 'border-radius: 4px 4px 0 0;'} opacity: ${cell_bar_opacity}; box-shadow: 0 -2px 8px rgba(0,0,0,0.3); overflow: hidden; }
                 .cell-bar.is-charging .charging-overlay { opacity: 1; animation: ${horizontal_layout ? 'shimmer-move-right' : 'shimmer-move-up'} 2s infinite linear; }
                 @keyframes shimmer-move-up { 0% { transform: translateY(100%); } 100% { transform: translateY(-100%); } } @keyframes shimmer-move-right { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
                 .charging-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to ${horizontal_layout ? 'right' : 'top'}, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 40%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0.15) 60%, rgba(255,255,255,0) 100%); z-index: 2; transform: ${horizontal_layout ? 'translateX(-100%)' : 'translateY(100%)'}; opacity: 0; pointer-events: none; }
@@ -1100,9 +1170,15 @@ class BmsBatteryCellsCard extends HTMLElement {
                 .legend-col { display: flex; flex-direction: var(--legend-direction); justify-content: var(--legend-align); ${horizontal_layout ? 'width: 100%; height: 20px; border-top: var(--legend-border-top); padding-top: 2px;' : 'height: 100%; padding-right: 8px; margin-right: 4px; border-right: var(--legend-border); min-width: 40px;'} font-size: 11px; color: var(--secondary-text-color); text-align: right; font-weight: 500; }
              `;
              
-             if (show_as_table) { standardHtml = `<div class="standard-view-wrapper"><div class="table-container">${cells.map((cell, index) => `<div class="table-item" id="table-item-${index}"><span class="table-name">${cell.name || (index+1)}</span><span class="table-val" id="table-val-${index}">-</span></div>`).join('')}</div></div>`; } 
-             else if (!horizontal_layout) { standardHtml = `<div class="standard-view-wrapper"><div class="main-container cells-container">${this._config.show_legend ? `<div class="legend-col">${scaleLabels.map(l => `<span>${l}</span>`).join('')}</div>` : ''}${cells.map((cell, index) => this._renderCellHtml(cell, index)).join('')}</div></div>`; } 
-             else { standardHtml = `<div class="standard-view-wrapper"><div class="main-container cells-container">${cells.map((cell, index) => this._renderCellHtml(cell, index)).join('')}${this._config.show_legend ? `<div class="legend-col">${scaleLabels.map(l => `<span>${l}</span>`).join('')}</div>` : ''}</div></div>`; }
+            if (show_as_table) {
+                standardHtml = `<div class="standard-view-wrapper"><div class="table-container">${cells.map((cell, index) => `<div class="table-item" id="table-item-${index}"><span class="table-name">${cell.name || (index + 1)}</span><span class="table-val" id="table-val-${index}">-</span></div>`).join('')}</div></div>`;
+            } 
+            else if (!horizontal_layout) {
+                standardHtml = `<div class="standard-view-wrapper"><div class="main-container cells-container">${this._config.show_legend ? `<div class="legend-col">${scaleLabels.map(l => `<span>${l}</span>`).join('')}</div>` : ''}${cells.map((cell, index) => this._renderCellHtml(cell, index)).join('')}</div></div>`;
+            } 
+            else {
+                standardHtml = `<div class="standard-view-wrapper"><div class="main-container cells-container">${cells.map((cell, index) => this._renderCellHtml(cell, index)).join('')}${this._config.show_legend ? `<div class="legend-col">${scaleLabels.map(l => `<span>${l}</span>`).join('')}</div>` : ''}</div></div>`;
+            }
         }
 
         const style = `
@@ -1269,9 +1345,11 @@ class BmsBatteryCellsCard extends HTMLElement {
         this.shadowRoot.getElementById('btn-charge')?.addEventListener('click', (e) => {
             e.stopPropagation(); this._handleSwitchAction(this._config.stat_charge_entity, this._config.stat_charge_on, this._config.stat_charge_off);
         });
+
         this.shadowRoot.getElementById('btn-discharge')?.addEventListener('click', (e) => {
              e.stopPropagation(); this._handleSwitchAction(this._config.stat_discharge_entity, this._config.stat_discharge_on, this._config.stat_discharge_off);
         });
+
         this.shadowRoot.getElementById('btn-balance')?.addEventListener('click', (e) => {
              e.stopPropagation(); 
              if(this._config.stat_balance_entity) {
@@ -1282,7 +1360,53 @@ class BmsBatteryCellsCard extends HTMLElement {
         this._initCharts();
     }
 
-    _updateColors() { return { bg: 'var(--card-background-color, #1c1c1e)', text: 'var(--primary-text-color, #ffffff)', textSecondary: 'var(--secondary-text-color, #9e9e9e)' }; }
+    _updateColors() {
+        return { bg: 'var(--card-background-color, #1c1c1e)', text: 'var(--primary-text-color, #ffffff)', textSecondary: 'var(--secondary-text-color, #9e9e9e)' };
+    }
+
+    _getCellBackground() { 
+        const { horizontal_layout, cell_background_color} = this._config;
+
+        if (cell_background_color === 'gradient') {
+            let direction = horizontal_layout ? 'to right' : 'to top';
+            return "linear-gradient(" + direction + ", #d32f2f 0%, #ef5350 7%, #ffa726 14.28%, #ffd600 28.57%, #43a047 42.85%, #42a5f5 57.14%, #1565c0 71.42%, #ff7043 85.71%, #ff5722 100%)";
+        }
+
+        return cell_background_color && cell_background_color.length > 0 ? cell_background_color : 'var(--card-background-color, #1c1c1e)';
+    }
+
+    _lerpColor(bottom, top, value, min, max) {
+        // Clamp + normalize
+        const t = max === min ? 0 : (value - min) / (max - min);
+        const clamped = Math.min(1, Math.max(0, t));
+      
+        // Convert hex → RGB
+        const c1 = this._hexToRgb(bottom);
+        const c2 = this._hexToRgb(top);
+      
+        // Interpolate channels
+        const r = Math.round(c1.r + (c2.r - c1.r) * clamped);
+        const g = Math.round(c1.g + (c2.g - c1.g) * clamped);
+        const b = Math.round(c1.b + (c2.b - c1.b) * clamped);
+      
+        //console.log('Lerp Color:', { value, min, max, t, clamped, c1, c2, r, g, b });
+
+        return `rgb(${r}, ${g}, ${b})`;
+    }
+      
+    _hexToRgb(hex) {
+        const clean = hex.replace('#', '');
+        const bigint = parseInt(clean.length === 3
+          ? clean.split('').map(c => c + c).join('')
+          : clean, 16);
+      
+        return {
+          r: (bigint >> 16) & 255,
+          g: (bigint >> 8) & 255,
+          b: bigint & 255
+        };
+    }
+
     _getColors() { return this._updateColors(); }
 
     _updateValues() {

@@ -150,28 +150,34 @@ Although UI configuration is recommended, the map can also be configured manuall
 
 ### Options
 
-| name                 | type      | required | description                                                        | default             |
-| -------------------- | --------- | -------- | ------------------------------------------------------------------ | ------------------- |
-| `type`               | `string`  | Yes      | Card type definition. Must be `custom:bms-battery-cells-card`.     |                     |
-| `title`              | `string`  | No       | Title displayed at the top of the card.                            | `"Batterie Zellen"` |
-| `cells`              | `list`    | Yes      | List of cell definitions (entity + name).                          | 4 example cells     |
-| `cells[].entity`     | `string`  | Yes      | Sensor entity representing the cell voltage.                       |                     |
-| `cells[].name`       | `string`  | No       | Display name of the cell.                                          | Cell index          |
-| `show_legend`        | `boolean` | No       | Show voltage scale (Y-axis) on the left side.                      | `true`              |
-| `container_padding`  | `number`  | No       | Inner padding of the card container (px).                          | `16`                |
-| `card_height`        | `number`  | No       | Fixed height of the card in pixels.                                | `380`               |
-| `cell_gap`           | `number`  | No       | Gap between individual cells (px).                                 | `4`                 |
-| `show_values`        | `boolean` | No       | Display voltage values inside each cell.                           | `true`              |
-| `show_values_on_top` | `boolean` | No       | Display statistic values above icons instead of inline.            | `false`             |
-| `enable_animations`  | `boolean` | No       | Enable charging/discharging animations.                            | `true`              |
-| `min_voltage`        | `number`  | No       | Minimum cell voltage for scaling.                                  | `2.60`              |
-| `max_voltage`        | `number`  | No       | Maximum cell voltage for scaling.                                  | `3.65`              |
-| `show_min_max`       | `boolean` | No       | Highlight the cells with minimum and maximum voltage.              | `true`              |
-| `show_average`       | `boolean` | No       | Display average cell voltage in statistics.                        | `false`             |
-| `soc_entity`         | `string`  | No       | State of Charge (SoC) sensor entity.                               |                     |
-| `watt_entity`        | `string`  | No       | Power sensor entity (positive = charging, negative = discharging). |                     |
-| `cell_diff_sensor`   | `string`  | No       | Cell voltage delta sensor (mV).                                    |                     |
-| `temp_entity`        | `string`  | No       | Battery temperature sensor entity.                                 |                     |
+| name                      | type      | required | description                                                        | default             |
+| ------------------------- | --------- | -------- | ------------------------------------------------------------------ | ------------------- |
+| `type`                    | `string`  | Yes      | Card type definition. Must be `custom:bms-battery-cells-card`.     |                     |
+| `title`                   | `string`  | No       | Title displayed at the top of the card.                            | `"Batterie Zellen"` |
+| `cells`                   | `list`    | Yes      | List of cell definitions (entity + name).                          | 4 example cells     |
+| `cells[].entity`          | `string`  | Yes      | Sensor entity representing the cell voltage.                       |                     |
+| `cells[].name`            | `string`  | No       | Display name of the cell.                                          | Cell index          |
+| `show_legend`             | `boolean` | No       | Show voltage scale (Y-axis) on the left side.                      | `true`              |
+| `container_padding`       | `number`  | No       | Inner padding of the card container (px).                          | `16`                |
+| `card_height`             | `number`  | No       | Fixed height of the card in pixels.                                | `380`               |
+| `cell_gap`                | `number`  | No       | Gap between individual cells (px).                                 | `4`                 |
+| `show_values`             | `boolean` | No       | Display voltage values inside each cell.                           | `true`              |
+| `show_values_on_top`      | `boolean` | No       | Display statistic values above icons instead of inline.            | `false`             |
+| `enable_animations`       | `boolean` | No       | Enable charging/discharging animations.                            | `true`              |
+| `min_voltage`             | `number`  | No       | Minimum cell voltage for scaling.                                  | `2.60`              |
+| `max_voltage`             | `number`  | No       | Maximum cell voltage for scaling.                                  | `3.65`              |
+| `show_min_max`            | `boolean` | No       | Highlight the cells with minimum and maximum voltage.              | `true`              |
+| `show_average`            | `boolean` | No       | Display average cell voltage in statistics.                        | `false`             |
+| `cell_background_color`   | `string`  | No       | Track background color. `gradient` or any CSS color string.        | `gradient`          |
+| `cell_background_opacity` | `number`  | No       | Background opacity for cell tracks (0.0-1.0).                      | `0.25`              |
+| `cell_bar_color`          | `string`  | No       | Bar color mode: `range`, `delta`, or hex color (custom).           | `range`             |
+| `cell_bar_opacity`        | `number`  | No       | Cell bar opacity (0.0-1.0).                                        | `0.6`               |
+| `cell_bar_top_color`      | `string`  | No       | Bar top color for `delta` mode (hex).                              | `#173117`           |
+| `cell_bar_bottom_color`   | `string`  | No       | Bar bottom color for `delta` mode (hex).                           | `#3c2222`           |
+| `soc_entity`              | `string`  | No       | State of Charge (SoC) sensor entity.                               |                     |
+| `watt_entity`             | `string`  | No       | Power sensor entity (positive = charging, negative = discharging). |                     |
+| `cell_diff_sensor`        | `string`  | No       | Cell voltage delta sensor (mV).                                    |                     |
+| `temp_entity`             | `string`  | No       | Battery temperature sensor entity.                                 |                     |
 
 ### Example configuration
 
@@ -206,6 +212,12 @@ cells:
     entity: sensor.vrm_minimum_cell_voltage_batt_2
 soc_entity: sensor.victron_system_battery_soc
 watt_entity: sensor.vrm_battery_power_batt_1024
+cell_background_color: "gradient"
+cell_background_opacity: 0.28
+cell_bar_color: "delta"
+cell_bar_opacity: 0.75
+cell_bar_top_color: "#13a826"
+cell_bar_bottom_color: "#941414"
 cell_diff_sensor: sensor.vrm_minimum_cell_voltage_batt_1
 temp_entity: sensor.vrm_battery_temperature_batt_1
 show_values_on_top: false

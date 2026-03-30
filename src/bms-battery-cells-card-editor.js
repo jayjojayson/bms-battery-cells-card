@@ -1,14 +1,14 @@
 import de from './lang-de.js';
 import en from './lang-en.js';
 
-// Helper um LitElement sicher zu laden
+// Helper to make sure LitElement is loaded
 const LitElement = customElements.get("ha-lit-element") || Object.getPrototypeOf(customElements.get("home-assistant-main"));
 const html = LitElement.prototype.html;
 const css = LitElement.prototype.css;
 
 const ICON_CLOSE = "M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z";
 
-// Selector Konfiguration für Sensoren
+// Sensor Selector Configuration for entity pickers
 const sensorSelector = { entity: { domain: "sensor" } };
 const binarySelector = { entity: { domain: ["binary_sensor", "sensor", "input_boolean", "switch"] } };
 const switchSelector = { entity: { domain: ["switch", "input_boolean", "input_select", "binary_sensor", "select"] } };
@@ -221,6 +221,17 @@ class BmsBatteryCellsCardEditor extends LitElement {
                 <div class="row"><span>${this._localize('editor.show_min_max')}</span><ha-switch .checked=${this._config.show_min_max !== false} .configValue=${'show_min_max'} @change=${this._valueChanged}></ha-switch></div>
                 <div class="row"><span>${this._localize('editor.show_average')}</span><ha-switch .checked=${this._config.show_average || false} .configValue=${'show_average'} @change=${this._valueChanged}></ha-switch></div>
                 <div class="row"><span>${this._localize('editor.calc_delta')}</span><ha-switch .checked=${this._config.show_voltage_diff || false} .configValue=${'show_voltage_diff'} @change=${this._valueChanged}></ha-switch></div>
+
+                <div class="row"><ha-textfield label="${this._localize('editor.cell_background_color')}" .value=${this._config.cell_background_color ?? 'gradient'} .configValue=${'cell_background_color'} @input=${this._valueChanged}></ha-textfield></div>
+                <div class="row"><ha-textfield label="${this._localize('editor.cell_background_opacity')}" type="number" step="0.05" min="0" max="1" .value=${this._config.cell_background_opacity ?? 0.25} .configValue=${'cell_background_opacity'} @input=${this._valueChanged}></ha-textfield></div>
+
+                <div class="row"><ha-textfield label="${this._localize('editor.cell_bar_color')}" .value=${this._config.cell_bar_color ?? 'range'} .configValue=${'cell_bar_color'} @input=${this._valueChanged}></ha-textfield></div>
+                ${this._config.cell_bar_color === 'delta' ? html`
+                  <div class="row"><ha-textfield label="${this._localize('editor.cell_bar_top_color')}" .value=${this._config.cell_bar_top_color ?? '#173117'} .configValue=${'cell_bar_top_color'} @input=${this._valueChanged}></ha-textfield></div>
+                  <div class="row"><ha-textfield label="${this._localize('editor.cell_bar_bottom_color')}" .value=${this._config.cell_bar_bottom_color ?? '#3c2222'} .configValue=${'cell_bar_bottom_color'} @input=${this._valueChanged}></ha-textfield></div>
+                ` : ''}
+
+                <div class="row"><ha-textfield label="${this._localize('editor.cell_bar_opacity')}" type="number" step="0.05" min="0" max="1" .value=${this._config.cell_bar_opacity ?? 0.6} .configValue=${'cell_bar_opacity'} @input=${this._valueChanged}></ha-textfield></div>
             ` : ''}
         </div>
 
