@@ -6,7 +6,7 @@ export default {
         power: "Gesamtleistung (Watt)",
         voltage: "Batterie Gesamtspannung (Volt)",
         current: "Batterie Gesamtstrom (Ampere)",
-        drift: "Zelldrift Externer Sensor (Delta mV)",
+        delta: "Zelldelta Externer Sensor (mV)",
         temp: "Batterie Temp (°C)",
         display_options: "Darstellung & Optionen",
         min_voltage: "Minimale Spannung (V)",
@@ -20,7 +20,7 @@ export default {
         show_cell_voltages: "Spannungswerte anzeigen",
         show_min_max: "Min/Max Zellen markieren",
         show_average: "Durchschnitt anzeigen",
-        calc_drift: "Zelldrift (Max-Min) intern berechnen",
+        calc_delta: "Zelldelta (Max-Min) intern berechnen",
         cells: "Zellen",
         add_cell: "Zelle hinzufügen",
         cell_name: "Name",
@@ -57,7 +57,7 @@ export default {
         power: "Leistung",
         soc: "Batteriestand",
         temp: "Temp",
-        drift: "Drift",
+        delta: "Delta",
         avg_cell: "Ø Zelle",
 
         // Detailansicht Labels

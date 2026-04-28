@@ -523,7 +523,7 @@ class BmsBatteryCellsCard extends HTMLElement {
         
         this.langs = { de, en };
         this.chartVoltage = null;
-        this.chartDrift = null;
+        this.chartDelta = null;
     }
 
     static async getConfigElement() {
@@ -677,14 +677,14 @@ class BmsBatteryCellsCard extends HTMLElement {
     async _initCharts() {
         setTimeout(async () => {
             const cv = this.shadowRoot.getElementById('canvas-voltage');
-            const cd = this.shadowRoot.getElementById('canvas-drift');
+            const cd = this.shadowRoot.getElementById('canvas-delta');
             if (cv && this._config.total_voltage_entity && !this.chartVoltage) {
                 const dataV = await this._fetchHistory(this._config.total_voltage_entity, 6);
                 this.chartVoltage = this._createChart(cv, dataV, '#ffa726', 'V');
             }
-            if (cd && this._config.cell_diff_sensor && !this.chartDrift) {
+            if (cd && this._config.cell_diff_sensor && !this.chartDelta) {
                 let dataD = await this._fetchHistory(this._config.cell_diff_sensor, 6);
-                this.chartDrift = this._createChart(cd, dataD, '#1e88e5', ''); 
+                this.chartDelta = this._createChart(cd, dataD, '#1e88e5', ''); 
             }
         }, 200);
     }
@@ -945,33 +945,33 @@ class BmsBatteryCellsCard extends HTMLElement {
                 });
             } else idx += removeElement(statsContainer, 'stat-soc');
             
-            let driftContent = null;
-            let driftEntity = null;
-            let driftColor = '';
+            let deltaContent = null;
+            let deltaEntity = null;
+            let deltaColor = '';
             
             if (cell_diff_sensor && diffVal !== null) {
-                driftEntity = cell_diff_sensor;
-                driftColor = (diffVal > 20) ? '#ef5350' : '#66bb6a';
-                driftContent = `<span class="stat-label">${this._localize('card.drift')}</span><div class="${rowClass}" style="color: ${driftColor}"><ha-icon icon="mdi:delta"></ha-icon><span>${Math.round(diffVal)} <span style="font-size:0.8em">mV</span></span></div>`;
+                deltaEntity = cell_diff_sensor;
+                deltaColor = (diffVal > 20) ? '#ef5350' : '#66bb6a';
+                deltaContent = `<span class="stat-label">${this._localize('card.delta')}</span><div class="${rowClass}" style="color: ${deltaColor}"><ha-icon icon="mdi:delta"></ha-icon><span>${Math.round(diffVal)} <span style="font-size:0.8em">mV</span></span></div>`;
             } else if (show_voltage_diff && maxIdx !== -1 && minIdx !== -1) {
-                driftEntity = null; 
+                deltaEntity = null; 
                 const calcDiff = (maxV - minV) * 1000;
-                driftColor = (calcDiff > 20) ? '#ef5350' : '#66bb6a';
-                driftContent = `<span class="stat-label">${this._localize('card.drift')}</span><div class="${rowClass}" style="color: ${driftColor}"><ha-icon icon="mdi:delta"></ha-icon><span>${Math.round(calcDiff)} <span style="font-size:0.8em">mV</span></span></div>`;
+                deltaColor = (calcDiff > 20) ? '#ef5350' : '#66bb6a';
+                deltaContent = `<span class="stat-label">${this._localize('card.delta')}</span><div class="${rowClass}" style="color: ${deltaColor}"><ha-icon icon="mdi:delta"></ha-icon><span>${Math.round(calcDiff)} <span style="font-size:0.8em">mV</span></span></div>`;
             }
 
-            if (driftContent) {
-                idx += updateElement(statsContainer, 'stat-drift', idx, (el) => {
+            if (deltaContent) {
+                idx += updateElement(statsContainer, 'stat-delta', idx, (el) => {
                     el.className = 'stat-item';
-                    if(el.innerHTML !== driftContent) el.innerHTML = driftContent;
-                    if(driftEntity) {
-                        el.onclick = (e) => { e.stopPropagation(); this._fireMoreInfo(driftEntity); };
+                    if(el.innerHTML !== deltaContent) el.innerHTML = deltaContent;
+                    if(deltaEntity) {
+                        el.onclick = (e) => { e.stopPropagation(); this._fireMoreInfo(deltaEntity); };
                         el.style.cursor = 'pointer';
                     } else {
                         el.onclick = null; el.style.cursor = 'default';
                     }
                 });
-            } else idx += removeElement(statsContainer, 'stat-drift');
+            } else idx += removeElement(statsContainer, 'stat-delta');
             
             if (show_average) {
                 idx += updateElement(statsContainer, 'stat-avg', idx, (el) => {
@@ -1247,13 +1247,13 @@ class BmsBatteryCellsCard extends HTMLElement {
                         </div>
                     </div>
                     
-                    <div class="box chart-box clickable" data-entity="${this._config.cell_diff_sensor}" id="chart-drift">
+                    <div class="box chart-box clickable" data-entity="${this._config.cell_diff_sensor}" id="chart-delta">
                         <div class="box-title">
                             <span>${this._localize('card.delta_cell_vol')}</span>
                             <ha-icon icon="mdi:delta" style="width:16px; height:16px; color:#1e88e5"></ha-icon>
                         </div>
-                        <div class="box-val-row"><span id="d-drift-val">--</span> <span class="unit">mV</span></div>
-                        <div class="chart-container-full"><canvas id="canvas-drift"></canvas></div>
+                        <div class="box-val-row"><span id="d-delta-val">--</span> <span class="unit">mV</span></div>
+                        <div class="chart-container-full"><canvas id="canvas-delta"></canvas></div>
                         <div class="chart-meta">
                             <span>${this._localize('card.max_cell')} : <span id="d-max-cell-idx" class="max-val-red">--</span></span>
                             <span>${this._localize('card.min_cell')} : <span id="d-min-cell-idx" class="min-val-blue">--</span></span>
@@ -1414,7 +1414,7 @@ class BmsBatteryCellsCard extends HTMLElement {
         const vTotal = this._parseNumber(c.total_voltage_entity);
         const iTotal = this._parseNumber(c.total_current_entity);
         const pTotal = this._parseNumber(c.watt_entity);
-        const drift  = this._parseNumber(c.cell_diff_sensor);
+        const delta  = this._parseNumber(c.cell_diff_sensor);
         const soc    = this._parseNumber(c.soc_entity);
         const soh    = this._parseNumber(c.soh_entity);
         
@@ -1460,13 +1460,13 @@ class BmsBatteryCellsCard extends HTMLElement {
         }
         addIfConf(rightList, 'cycle_count_entity', 'card.cycle_count', '');
         
-        let driftDisplay = drift;
-        if (drift === null && maxV > 0 && minV < 999) driftDisplay = (maxV - minV) * 1000;
-        else if (drift !== null && drift < 1) driftDisplay = drift * 1000;
-        const driftStr = driftDisplay !== null ? (driftDisplay/1000).toFixed(3) + ' V' : '--';
-        const driftEnt = c.cell_diff_sensor || '';
-        const driftClass = driftEnt ? 'detail-item clickable' : 'detail-item';
-        rightList.push(`<div class="${driftClass}" data-entity="${driftEnt}"><span class="detail-label">${this._localize('card.delta_cell_vol')} :</span><span class="detail-val-txt">${driftStr}</span></div>`);
+        let deltaDisplay = delta;
+        if (delta === null && maxV > 0 && minV < 999) deltaDisplay = (maxV - minV) * 1000;
+        else if (delta !== null && delta < 1) deltaDisplay = delta * 1000;
+        const deltaStr = deltaDisplay !== null ? (deltaDisplay/1000).toFixed(3) + ' V' : '--';
+        const deltaEnt = c.cell_diff_sensor || '';
+        const deltaClass = deltaEnt ? 'detail-item clickable' : 'detail-item';
+        rightList.push(`<div class="${deltaClass}" data-entity="${deltaEnt}"><span class="detail-label">${this._localize('card.delta_cell_vol')} :</span><span class="detail-val-txt">${deltaStr}</span></div>`);
         
         addIfConf(rightList, 'temp_mos_entity', 'card.mos_temp', '°C', true);
 
@@ -1484,7 +1484,7 @@ class BmsBatteryCellsCard extends HTMLElement {
         const minCellEl = this.shadowRoot.getElementById('d-min-cell-val');
         if (minCellEl && minIdx !== -1) { minCellEl.dataset.entity = c.cells[minIdx].entity; }
 
-        setTxt('d-drift-val', driftDisplay !== null ? Math.round(driftDisplay) : '--');
+        setTxt('d-delta-val', deltaDisplay !== null ? Math.round(deltaDisplay) : '--');
         setTxt('d-max-cell-idx', maxIdx !== -1 ? (c.cells[maxIdx].name || (maxIdx+1)) : '--');
         setTxt('d-min-cell-idx', minIdx !== -1 ? (c.cells[minIdx].name || (minIdx+1)) : '--');
         
@@ -1566,7 +1566,7 @@ class BmsBatteryCellsCard extends HTMLElement {
         }
         
         if (this.chartVoltage && vTotal !== null) { this._updateChartData(this.chartVoltage, Date.now(), vTotal); }
-        if (this.chartDrift && driftDisplay !== null) { this._updateChartData(this.chartDrift, Date.now(), driftDisplay); }
+        if (this.chartDelta && deltaDisplay !== null) { this._updateChartData(this.chartDelta, Date.now(), deltaDisplay); }
         
         if (c.show_standard_in_detail) {
             this._updateStandardValues();

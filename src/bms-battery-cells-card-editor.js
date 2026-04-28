@@ -241,7 +241,7 @@ class BmsBatteryCellsCardEditor extends LitElement {
             ${this._renderEntitySelector('editor.power', 'watt_entity', sensorSelector)}
             ${this._renderEntitySelector('editor.voltage', 'total_voltage_entity', sensorSelector)}
             ${this._renderEntitySelector('editor.current', 'total_current_entity', sensorSelector)}
-            ${this._renderEntitySelector('editor.drift', 'cell_diff_sensor', sensorSelector)}
+            ${this._renderEntitySelector('editor.delta', 'cell_diff_sensor', sensorSelector)}
             ${this._renderEntitySelector('editor.temp', 'temp_entity', sensorSelector)}
         
             ${this._config.show_detailed_view ? html`

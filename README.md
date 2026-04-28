@@ -35,7 +35,7 @@ If you like this custom card, I would really appreciate a star rating ⭐. Thank
 
 ### 📈 **Detailed View (optional)**
 
-- **Integrated Charts:** Live history graphs for **Total Voltage** and **Cell Drift** (using Chart.js)
+- **Integrated Charts:** Live history graphs for **Total Voltage** and **Cell Delta** (using Chart.js)
 - **Extended BMS Metrics:** Display of **SoH**, **Cycles**, **Capacity** (Ah), and **MOS Temperature**
 - **Remaining Capacity:** Auto-calculation based on Amp-hours and SoC
 - **Cell List:** detailed table of all cell voltages including individual balancing status
@@ -52,7 +52,7 @@ If you like this custom card, I would really appreciate a star rating ⭐. Thank
 ### 📉 **Statistics & Monitoring**
 
 - **Real-time Stats:** Total Voltage, Current, Power (Watt), and Temperature
-- **Smart Drift Calculation:** Automatically calculates the delta between Min and Max cells (or uses an external sensor)
+- **Smart Delta Calculation:** Automatically calculates the difference between Min and Max cells (or uses an external sensor)
 - **Min/Max Indicators:** Visual highlighting of the highest and lowest voltage cells
 - **Average Voltage:** Option to display the calculated average cell voltage
 
@@ -140,7 +140,7 @@ After installation, you can add the card to your dashboard:
     - A configuration dialog will open where all settings can be conveniently adjusted.
     - **BMS Entity:** The main entity or list of sensors.
     - **Voltage Range:** Define the minimum and maximum voltage for the graphical display.
-    - **Details:** Display additional values ​​such as battery power, temperature, drift, or average voltage.
+    - **Details:** Display additional values ​​such as battery power, temperature, delta, or average voltage.
 
 ---
 

@@ -33,7 +33,7 @@ Wenn euch die custom Card gefällt, würde ich mich sehr über eine Sternebewert
 
 ### 📈 **Detaillierte Ansicht (optional)**
 
-- **Integrierte Diagramme:** Live-Verlaufsgrafiken für **Gesamtspannung** und **Zelldrift** (via Chart.js)
+- **Integrierte Diagramme:** Live-Verlaufsgrafiken für **Gesamtspannung** und **Zelldelta** (via Chart.js)
 - **Erweiterte BMS-Metriken:** Anzeige von **SoH**, **Ladezyklen**, **Kapazität** (Ah) und **MOS-Temperatur**
 - **Restkapazität:** Automatische Berechnung basierend auf der Batteriekapazität (Ah) und dem SoC
 - **Zellliste:** Detaillierte Tabelle aller Einzelzellspannungen inklusive individuellem Balancing-Status
@@ -50,7 +50,7 @@ Wenn euch die custom Card gefällt, würde ich mich sehr über eine Sternebewert
 ### 📉 **Statistiken & Überwachung**
 
 - **Echtzeit-Statistiken:** Gesamtspannung, Strom, Leistung (Watt) und Temperatur
-- **Smarte Drift-Berechnung:** Berechnet automatisch das Delta zwischen Min- und Max-Zellen (oder nutzt einen externen Sensor)
+- **Smarte Delta-Berechnung:** Berechnet automatisch den Uterschied zwischen Min- und Max-Zellen (oder nutzt einen externen Sensor)
 - **Min/Max Indikatoren:** Visuelle Hervorhebung der Zellen mit der höchsten und niedrigsten Spannung
 - **Durchschnittsspannung:** Option zur Anzeige der berechneten durchschnittlichen Zellspannung
 

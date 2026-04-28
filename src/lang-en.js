@@ -6,7 +6,7 @@ export default {
         power: "Total Power (Watt)",
         voltage: "Total Voltage (Volt)",
         current: "Total Current (Ampere)",
-        drift: "Cell Drift External Sensor (Delta mV)",
+        delta: "Cell Voltage Delta External Sensor (mV)",
         temp: "Battery Temp (°C)",
         display_options: "Display & Options",
         min_voltage: "Min Voltage (V)",
@@ -20,7 +20,7 @@ export default {
         show_cell_voltages: "Show Cell Voltages",
         show_min_max: "Highlight Min/Max Cells",
         show_average: "Show Average Voltage",
-        calc_drift: "Calculate Drift (Max-Min) internally",
+        calc_delta: "Calculate Delta (Max-Min) internally",
         cells: "Cells",
         add_cell: "Add Cell",
         cell_name: "Name",
@@ -57,7 +57,7 @@ export default {
         power: "Power",
         soc: "SoC",
         temp: "Temp",
-        drift: "Drift",
+        delta: "Delta",
         avg_cell: "Ø Cell",
         
         // Detailed View Labels
