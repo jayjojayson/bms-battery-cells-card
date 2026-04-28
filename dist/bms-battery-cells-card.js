@@ -6,7 +6,7 @@ var de = {
         power: "Gesamtleistung (Watt)",
         voltage: "Batterie Gesamtspannung (Volt)",
         current: "Batterie Gesamtstrom (Ampere)",
-        delta: "Zelldelta Externer Sensor (mV)",
+        drift: "Zelldrift Externer Sensor (Delta mV)",
         temp: "Batterie Temp (°C)",
         display_options: "Darstellung & Optionen",
         min_voltage: "Minimale Spannung (V)",
@@ -20,18 +20,12 @@ var de = {
         show_cell_voltages: "Spannungswerte anzeigen",
         show_min_max: "Min/Max Zellen markieren",
         show_average: "Durchschnitt anzeigen",
-        calc_delta: "Zelldelta (Max-Min) intern berechnen",
+        calc_drift: "Zelldrift (Max-Min) intern berechnen",
         cells: "Zellen",
         add_cell: "Zelle hinzufügen",
         cell_name: "Name",
         cell_entity: "Spannung Sensor",
         cell_balance_entity: "Balancer Sensor (opt.)", // NEU
-        cell_background_color: "Hintergrund-Farbe Zellbalken: 'gradient' oder Hex-Farbe",
-        cell_background_opacity: "Hintergrund-Deckkraft (0.0 - 1.0)",
-        cell_bar_color: "Balkenfarbe-Modus ('range', 'delta' oder Farbe)",
-        cell_bar_opacity: "Balken-Deckkraft (0.0 - 1.0)",
-        cell_bar_top_color: "Balkenoberfarbe (Hex, für delta-Modus)",
-        cell_bar_bottom_color: "Balkenunterfarbe (Hex, für delta-Modus)",
 
         // Detailansicht Optionen
         show_detailed_view: "Detailansicht aktivieren",
@@ -57,7 +51,7 @@ var de = {
         power: "Leistung",
         soc: "Batteriestand",
         temp: "Temp",
-        delta: "Delta",
+        drift: "Drift",
         avg_cell: "Ø Zelle",
 
         // Detailansicht Labels
@@ -88,7 +82,7 @@ var en = {
         power: "Total Power (Watt)",
         voltage: "Total Voltage (Volt)",
         current: "Total Current (Ampere)",
-        delta: "Cell Voltage Delta External Sensor (mV)",
+        drift: "Cell Drift External Sensor (Delta mV)",
         temp: "Battery Temp (°C)",
         display_options: "Display & Options",
         min_voltage: "Min Voltage (V)",
@@ -102,19 +96,13 @@ var en = {
         show_cell_voltages: "Show Cell Voltages",
         show_min_max: "Highlight Min/Max Cells",
         show_average: "Show Average Voltage",
-        calc_delta: "Calculate Delta (Max-Min) internally",
+        calc_drift: "Calculate Drift (Max-Min) internally",
         cells: "Cells",
         add_cell: "Add Cell",
         cell_name: "Name",
         cell_entity: "Voltage Entity",
         cell_balance_entity: "Balancer Entity (opt.)", // NEU
-        cell_background_color: "Cell background: 'gradient' or hex color",
-        cell_background_opacity: "Cell background opacity (0.0 - 1.0)",
-        cell_bar_color: "Cell bar color mode ('range', 'delta', or color)",
-        cell_bar_opacity: "Cell bar opacity (0.0 - 1.0)",
-        cell_bar_top_color: "Bar top color (hex, for delta mode)",
-        cell_bar_bottom_color: "Bar bottom color (hex, for delta mode)",
-
+        
         // Detailed View Options
         show_detailed_view: "Enable Detailed View",
         show_cell_list: "Show Cell Voltage List", 
@@ -139,7 +127,7 @@ var en = {
         power: "Power",
         soc: "SoC",
         temp: "Temp",
-        delta: "Delta",
+        drift: "Drift",
         avg_cell: "Ø Cell",
         
         // Detailed View Labels
@@ -162,14 +150,14 @@ var en = {
     }
 };
 
-// Helper to make sure LitElement is loaded
+// Helper um LitElement sicher zu laden
 const LitElement = customElements.get("ha-lit-element") || Object.getPrototypeOf(customElements.get("home-assistant-main"));
 const html = LitElement.prototype.html;
 const css = LitElement.prototype.css;
 
 const ICON_CLOSE = "M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z";
 
-// Sensor Selector Configuration for entity pickers
+// Selector Konfiguration für Sensoren
 const sensorSelector = { entity: { domain: "sensor" } };
 const binarySelector = { entity: { domain: ["binary_sensor", "sensor", "input_boolean", "switch"] } };
 const switchSelector = { entity: { domain: ["switch", "input_boolean", "input_select", "binary_sensor", "select"] } };
@@ -381,18 +369,7 @@ class BmsBatteryCellsCardEditor extends LitElement {
                 <div class="row"><span>${this._localize('editor.show_cell_voltages')}</span><ha-switch .checked=${this._config.show_values !== false} .configValue=${'show_values'} @change=${this._valueChanged}></ha-switch></div>
                 <div class="row"><span>${this._localize('editor.show_min_max')}</span><ha-switch .checked=${this._config.show_min_max !== false} .configValue=${'show_min_max'} @change=${this._valueChanged}></ha-switch></div>
                 <div class="row"><span>${this._localize('editor.show_average')}</span><ha-switch .checked=${this._config.show_average || false} .configValue=${'show_average'} @change=${this._valueChanged}></ha-switch></div>
-                <div class="row"><span>${this._localize('editor.calc_delta')}</span><ha-switch .checked=${this._config.show_voltage_diff || false} .configValue=${'show_voltage_diff'} @change=${this._valueChanged}></ha-switch></div>
-
-                <div class="row"><ha-textfield label="${this._localize('editor.cell_background_color')}" .value=${this._config.cell_background_color ?? 'gradient'} .configValue=${'cell_background_color'} @input=${this._valueChanged}></ha-textfield></div>
-                <div class="row"><ha-textfield label="${this._localize('editor.cell_background_opacity')}" type="number" step="0.05" min="0" max="1" .value=${this._config.cell_background_opacity ?? 0.25} .configValue=${'cell_background_opacity'} @input=${this._valueChanged}></ha-textfield></div>
-
-                <div class="row"><ha-textfield label="${this._localize('editor.cell_bar_color')}" .value=${this._config.cell_bar_color ?? 'range'} .configValue=${'cell_bar_color'} @input=${this._valueChanged}></ha-textfield></div>
-                ${this._config.cell_bar_color === 'delta' ? html`
-                  <div class="row"><ha-textfield label="${this._localize('editor.cell_bar_top_color')}" .value=${this._config.cell_bar_top_color ?? '#173117'} .configValue=${'cell_bar_top_color'} @input=${this._valueChanged}></ha-textfield></div>
-                  <div class="row"><ha-textfield label="${this._localize('editor.cell_bar_bottom_color')}" .value=${this._config.cell_bar_bottom_color ?? '#3c2222'} .configValue=${'cell_bar_bottom_color'} @input=${this._valueChanged}></ha-textfield></div>
-                ` : ''}
-
-                <div class="row"><ha-textfield label="${this._localize('editor.cell_bar_opacity')}" type="number" step="0.05" min="0" max="1" .value=${this._config.cell_bar_opacity ?? 0.6} .configValue=${'cell_bar_opacity'} @input=${this._valueChanged}></ha-textfield></div>
+                <div class="row"><span>${this._localize('editor.calc_drift')}</span><ha-switch .checked=${this._config.show_voltage_diff || false} .configValue=${'show_voltage_diff'} @change=${this._valueChanged}></ha-switch></div>
             ` : ''}
         </div>
 
@@ -402,7 +379,7 @@ class BmsBatteryCellsCardEditor extends LitElement {
             ${this._renderEntitySelector('editor.power', 'watt_entity', sensorSelector)}
             ${this._renderEntitySelector('editor.voltage', 'total_voltage_entity', sensorSelector)}
             ${this._renderEntitySelector('editor.current', 'total_current_entity', sensorSelector)}
-            ${this._renderEntitySelector('editor.delta', 'cell_diff_sensor', sensorSelector)}
+            ${this._renderEntitySelector('editor.drift', 'cell_diff_sensor', sensorSelector)}
             ${this._renderEntitySelector('editor.temp', 'temp_entity', sensorSelector)}
         
             ${this._config.show_detailed_view ? html`
