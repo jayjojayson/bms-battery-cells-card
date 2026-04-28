@@ -26,6 +26,12 @@ export default {
         cell_name: "Name",
         cell_entity: "Spannung Sensor",
         cell_balance_entity: "Balancer Sensor (opt.)", // NEU
+        cell_background_color: "Hintergrund-Farbe Zellbalken: 'gradient' oder Hex-Farbe",
+        cell_background_opacity: "Hintergrund-Deckkraft (0.0 - 1.0)",
+        cell_bar_color: "Balkenfarbe-Modus ('range', 'delta' oder Farbe)",
+        cell_bar_opacity: "Balken-Deckkraft (0.0 - 1.0)",
+        cell_bar_top_color: "Balkenoberfarbe (Hex, für delta-Modus)",
+        cell_bar_bottom_color: "Balkenunterfarbe (Hex, für delta-Modus)",
 
         // Detailansicht Optionen
         show_detailed_view: "Detailansicht aktivieren",

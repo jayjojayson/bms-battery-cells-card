@@ -26,7 +26,13 @@ export default {
         cell_name: "Name",
         cell_entity: "Voltage Entity",
         cell_balance_entity: "Balancer Entity (opt.)", // NEU
-        
+        cell_background_color: "Cell background: 'gradient' or hex color",
+        cell_background_opacity: "Cell background opacity (0.0 - 1.0)",
+        cell_bar_color: "Cell bar color mode ('range', 'delta', or color)",
+        cell_bar_opacity: "Cell bar opacity (0.0 - 1.0)",
+        cell_bar_top_color: "Bar top color (hex, for delta mode)",
+        cell_bar_bottom_color: "Bar bottom color (hex, for delta mode)",
+
         // Detailed View Options
         show_detailed_view: "Enable Detailed View",
         show_cell_list: "Show Cell Voltage List", 
