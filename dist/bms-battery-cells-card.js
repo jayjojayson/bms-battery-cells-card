@@ -670,17 +670,29 @@ class BmsBatteryCellsCard extends HTMLElement {
         this._initialized = true;
     }
 
-    async _fetchHistory(entityId, hours = 6) {
+    _toMillivolts(value, unit) {
+        if (value === null || !Number.isFinite(value)) return null;
+        if (unit === 'V') return value * 1000;
+        if (unit === 'mV') return value;
+        // Preserve the existing behavior for sensors without unit metadata.
+        return value < 1 ? value * 1000 : value;
+    }
+
+    async _fetchHistory(entityId, hours = 6, includeAttributes = false) {
         if (!entityId) return [];
         const endTime = new Date();
         const startTime = new Date(endTime.getTime() - (hours * 60 * 60 * 1000));
         try {
             const history = await this._hass.callApi(
                 "GET", 
-                `history/period/${startTime.toISOString()}?filter_entity_id=${entityId}&end_time=${endTime.toISOString()}&minimal_response`
+                `history/period/${startTime.toISOString()}?filter_entity_id=${entityId}&end_time=${endTime.toISOString()}${includeAttributes ? '' : '&minimal_response'}`
             );
             if (history && history[0]) {
-                return history[0].map(entry => ({ x: new Date(entry.last_changed).getTime(), y: parseFloat(entry.state) })).filter(pt => !isNaN(pt.y));
+                return history[0].map(entry => ({
+                    x: new Date(entry.last_changed).getTime(),
+                    y: parseFloat(entry.state),
+                    ...(includeAttributes ? { unit: entry.attributes?.unit_of_measurement } : {})
+                })).filter(pt => !isNaN(pt.y));
             }
             return [];
         } catch (e) { return []; }
@@ -695,8 +707,14 @@ class BmsBatteryCellsCard extends HTMLElement {
                 this.chartVoltage = this._createChart(cv, dataV, '#ffa726', 'V');
             }
             if (cd && this._config.cell_diff_sensor && !this.chartDelta) {
-                let dataD = await this._fetchHistory(this._config.cell_diff_sensor, 6);
-                this.chartDelta = this._createChart(cd, dataD, '#1e88e5', ''); 
+                const entityId = this._config.cell_diff_sensor;
+                const currentUnit = this._hass.states[entityId]?.attributes?.unit_of_measurement;
+                let dataD = await this._fetchHistory(entityId, 6, true);
+                dataD = dataD.map(pt => ({
+                    x: pt.x,
+                    y: this._toMillivolts(pt.y, pt.unit ?? currentUnit)
+                }));
+                this.chartDelta = this._createChart(cd, dataD, '#1e88e5', 'mV');
             }
         }, 200);
     }
@@ -921,8 +939,8 @@ class BmsBatteryCellsCard extends HTMLElement {
         const statsContainer = this.shadowRoot.getElementById('stats-container');
         if (statsContainer) {
             const socValRaw = this._parseNumber(soc_entity);
-            let diffVal = this._parseNumber(cell_diff_sensor);
-            if (diffVal !== null && diffVal < 1) diffVal *= 1000;
+            const diffUnit = this._hass.states[cell_diff_sensor]?.attributes?.unit_of_measurement;
+            const diffVal = this._toMillivolts(this._parseNumber(cell_diff_sensor), diffUnit);
             
             let idx = 0;
             const updateElement = (container, id, index, renderFn) => {
@@ -1472,9 +1490,9 @@ class BmsBatteryCellsCard extends HTMLElement {
         }
         addIfConf(rightList, 'cycle_count_entity', 'card.cycle_count', '');
         
-        let deltaDisplay = delta;
-        if (delta === null && maxV > 0 && minV < 999) deltaDisplay = (maxV - minV) * 1000;
-        else if (delta !== null && delta < 1) deltaDisplay = delta * 1000;
+        const deltaUnit = this._hass.states[c.cell_diff_sensor]?.attributes?.unit_of_measurement;
+        let deltaDisplay = this._toMillivolts(delta, deltaUnit);
+        if (deltaDisplay === null && maxV > 0 && minV < 999) deltaDisplay = (maxV - minV) * 1000;
         const deltaStr = deltaDisplay !== null ? (deltaDisplay/1000).toFixed(3) + ' V' : '--';
         const deltaEnt = c.cell_diff_sensor || '';
         const deltaClass = deltaEnt ? 'detail-item clickable' : 'detail-item';
