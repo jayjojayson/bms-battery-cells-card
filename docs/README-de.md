@@ -153,7 +153,7 @@ Obwohl die UI-Konfiguration empfohlen wird, kann die Karte auch manuell über de
 | name                      | typ       | erforderlich | Beschreibung                                                    | Standard            |
 | ------------------------- | --------- | ------------ | --------------------------------------------------------------- | ------------------- |
 | `type`                    | `string`  | Ja           | Kartentyp. Muss `custom:bms-battery-cells-card` sein.           |                     |
-| `title`                   | `string`  | Nein         | Titel, der oben in der Karte angezeigt wird.                    | `"Batterie Zellen"` |
+| `title`                   | `string`  | Nein         | Titel, der oben in der Karte angezeigt wird. Ohne Titel wird ein Standardtitel in der Home-Assistant-Sprache verwendet. | z. B. `"Batterie Zellen"` |
 | `cells`                   | `list`    | Ja           | Liste der Zellen (jeweils mit Entität und optionalem Namen).    | 4 Beispiel-Zellen   |
 | `cells[].entity`          | `string`  | Ja           | Sensor-Entität der Zellspannung.                                |                     |
 | `cells[].name`            | `string`  | Nein         | Anzeigename der Zelle.                                          | Zell-Index          |

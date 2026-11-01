@@ -1,6 +1,7 @@
 import de from './lang-de.js';
 import en from './lang-en.js';
 import fr from './lang-fr.js';
+import gr from './lang-gr.js';
 import './chart.umd.min.js';
 
 // Helper um LitElement sicher zu laden
@@ -25,7 +26,8 @@ const colorSelector = (options) => ({ select: { options, custom_value: true, mod
 const CUSTOM_STATE_DOMAINS = ["select", "input_select"];
 
 // Lokalisierung mit Fallback auf Englisch pro Schlüssel (verhindert rohe Keys wie "card.delta")
-const LANGS = { de, en, fr };
+// Griechisch: HA meldet "el", PR #14 nutzte "gr" -> beide Codes
+const LANGS = { de, en, fr, el: gr, gr };
 const localize = (hass, key) => {
   const code = (hass?.locale?.language || 'en').split('-')[0];
   const lookup = (dict) => key.split('.').reduce((o, i) => (o ? o[i] : undefined), dict);
@@ -371,7 +373,6 @@ class BmsBatteryCellsCard extends HTMLElement {
 
     static getStubConfig() {
         return {
-            title: "Batterie Zellen",
             cells: Array.from({length: 4}, (_, i) => ({ entity: `sensor.cell_${i+1}`, name: `${i+1}`, balance_entity: '' }))
         };
     }
@@ -379,7 +380,8 @@ class BmsBatteryCellsCard extends HTMLElement {
     set hass(hass) {
         const oldHass = this._hass;
         this._hass = hass;
-        if (!this._initialized) {
+        if (!this._initialized || (oldHass && oldHass.locale?.language !== hass.locale?.language)) {
+            // Erstes Rendern oder Sprachwechsel (Beschriftungen/Titel stehen im HTML) -> neu aufbauen
             this._initRender();
         } else if (oldHass && !this._relevantStateChanged(oldHass, hass)) {
             // Home Assistant ruft den Setter bei JEDER Zustandsänderung im System auf.
@@ -410,7 +412,6 @@ class BmsBatteryCellsCard extends HTMLElement {
     setConfig(config) {
         if (!config) throw new Error("Invalid configuration");
         this._config = {
-            title: "Batterie Zellen",
             show_legend: true,
             container_padding: 16,
             card_height: 380,
@@ -810,7 +811,7 @@ class BmsBatteryCellsCard extends HTMLElement {
         if (show_as_table) { containerHtml = `<div class="table-container">${cells.map((cell, index) => `<div class="table-item" id="table-item-${index}"><span class="table-name">${this._esc(cell.name || (index+1))}</span><span class="table-val" id="table-val-${index}">-</span></div>`).join('')}</div>`; } 
         else if (!horizontal_layout) { containerHtml = `<div class="main-container cells-container">${this._config.show_legend ? `<div class="legend-col">${scaleLabels.map(l => `<span>${l}</span>`).join('')}</div>` : ''}${cells.map((cell, index) => this._renderCellHtml(cell, index)).join('')}</div>`; } 
         else { containerHtml = `<div class="main-container cells-container">${cells.map((cell, index) => this._renderCellHtml(cell, index)).join('')}${this._config.show_legend ? `<div class="legend-col">${scaleLabels.map(l => `<span>${l}</span>`).join('')}</div>` : ''}</div>`; }
-        const html = `<ha-card><div class="header card-header"><div class="title">${this._esc(title)}</div><div class="sub-info-row" id="sub-info-container"></div><div class="stats" id="stats-container"></div></div>${containerHtml}</ha-card>`;
+        const html = `<ha-card><div class="header card-header"><div class="title">${this._esc(title ?? this._localize('card.default_title'))}</div><div class="sub-info-row" id="sub-info-container"></div><div class="stats" id="stats-container"></div></div>${containerHtml}</ha-card>`;
         this.shadowRoot.innerHTML = style + html;
         this._setupTooltips();
     }

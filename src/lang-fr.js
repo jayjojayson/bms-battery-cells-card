@@ -64,6 +64,7 @@ export default {
   },
 
   card: {
+    default_title: "Cellules de batterie",
     power: "Puissance",
     soc: "SoC",
     temp: "Température",

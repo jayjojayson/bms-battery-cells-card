@@ -62,6 +62,7 @@ export default {
         val_off: "Value for OFF (e.g. 'OFF' or 'False')"
     },
     card: {
+        default_title: "Battery Cells",
         power: "Power",
         soc: "SoC",
         temp: "Temp",

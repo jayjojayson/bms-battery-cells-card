@@ -16,7 +16,7 @@ The card can be fully configured via the card editor user interface.
 You need the corresponding entities from your BMS (e.g. Victron, JK-BMS, Daly, Seplos, JBD) that provide the cell voltages in Home Assistant.
 Regular batteries (AGM and similar with 12, 24v or 48v) also work, as long as you have suitable entities available in Home Assistant.
 
-Supported Card languages are English and German. If you need other languages as well, tell me.
+Supported card languages are English, German, French and Greek. If you need other languages as well, tell me.
 
 If you like this custom card, I would really appreciate a star rating ⭐. Thanks 🤗
 
@@ -153,7 +153,7 @@ Although UI configuration is recommended, the map can also be configured manuall
 | name                      | type      | required | description                                                        | default             |
 | ------------------------- | --------- | -------- | ------------------------------------------------------------------ | ------------------- |
 | `type`                    | `string`  | Yes      | Card type definition. Must be `custom:bms-battery-cells-card`.     |                     |
-| `title`                   | `string`  | No       | Title displayed at the top of the card.                            | `"Batterie Zellen"` |
+| `title`                   | `string`  | No       | Title displayed at the top of the card. Without a title, a default in the Home Assistant language is used. | e.g. `"Battery Cells"` |
 | `cells`                   | `list`    | Yes      | List of cell definitions (entity + name).                          | 4 example cells     |
 | `cells[].entity`          | `string`  | Yes      | Sensor entity representing the cell voltage.                       |                     |
 | `cells[].name`            | `string`  | No       | Display name of the cell.                                          | Cell index          |
