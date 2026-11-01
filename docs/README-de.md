@@ -176,8 +176,17 @@ Obwohl die UI-Konfiguration empfohlen wird, kann die Karte auch manuell über de
 | `cell_bar_bottom_color`   | `string`  | Nein         | Balken-Unterfarbe für `delta` (Hex).                            | `#3c2222`           |
 | `soc_entity`              | `string`  | Nein         | Sensor-Entität für den Ladezustand (SoC).                       |                     |
 | `watt_entity`             | `string`  | Nein         | Leistungs-Sensor (positiv = Laden, negativ = Entladen).         |                     |
-| `cell_diff_sensor`        | `string`  | Nein         | Sensor für die Zellspannungs-Abweichung (mV).                   |                     |
-| `temp_entity`             | `string`  | Nein         | Sensor-Entität für die Batterietemperatur.                      |                     |
+| `cell_diff_sensor`        | `string`  | Nein         | Sensor für die Zellspannungs-Abweichung (`mV` oder `V`, Erkennung über die Einheit). |                     |
+| `temp_entity`             | `string`  | Nein         | Sensor-Entität für die Batterietemperatur (`°C`, `°F` oder `K`, wie von Home Assistant gemeldet). |                     |
+| `temp_mos_entity`         | `string`  | Nein         | MOSFET-Temperatursensor (Detailansicht, Einheit wie von Home Assistant gemeldet). |                     |
+| `cells[].resistance_entity` | `string` | Nein       | Widerstands-Sensor je Zelle, wird in der Zellliste angezeigt (Detailansicht). |                     |
+| `show_title_in_detail`    | `boolean` | Nein         | Zeigt den Kartentitel `title` in der Detailansicht an.          | `true`              |
+| `show_status`             | `boolean` | Nein         | Detailansicht: Gesamtstatus (Laden / Entladen / Balancing / Leerlauf), abgeleitet aus Leistung/Strom und Balancing-Status. | `false` |
+| `balance_led`             | `boolean` | Nein         | Detailansicht: Zell-Balancing als LED statt „bal. on / bal. off“ anzeigen. | `false`      |
+| `stat_heater_entity`      | `string`  | Nein         | Detailansicht: Heizungs-Schalter / input_boolean / select, neben Laden, Entladen und Balance. |  |
+| `stat_heater_on` / `stat_heater_off` | `string` | Nein | Eigene EIN/AUS-Werte für die Heizungs-Entität (z. B. bei Selects). |                     |
+
+> **Einheiten:** Temperaturen werden in der Einheit der Entität angezeigt (`°C`/`°F`/`K`). Zellspannungen und das Zelldelta werden anhand der `unit_of_measurement` des Sensors (`V`/`mV`) normalisiert; Sensoren ohne Einheit werden weiterhin automatisch erkannt.
 
 ### Beispielkonfiguration
 

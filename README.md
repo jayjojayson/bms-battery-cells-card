@@ -176,8 +176,17 @@ Although UI configuration is recommended, the map can also be configured manuall
 | `cell_bar_bottom_color`   | `string`  | No       | Bar bottom color for `delta` mode (hex).                           | `#3c2222`           |
 | `soc_entity`              | `string`  | No       | State of Charge (SoC) sensor entity.                               |                     |
 | `watt_entity`             | `string`  | No       | Power sensor entity (positive = charging, negative = discharging). |                     |
-| `cell_diff_sensor`        | `string`  | No       | Cell voltage delta sensor (mV).                                    |                     |
-| `temp_entity`             | `string`  | No       | Battery temperature sensor entity.                                 |                     |
+| `cell_diff_sensor`        | `string`  | No       | Cell voltage delta sensor (`mV` or `V`, detected via the unit).    |                     |
+| `temp_entity`             | `string`  | No       | Battery temperature sensor entity (`°C`, `°F` or `K`, as reported by Home Assistant). |                     |
+| `temp_mos_entity`         | `string`  | No       | MOSFET temperature sensor (detailed view, unit as reported by Home Assistant). |                     |
+| `cells[].resistance_entity` | `string` | No      | Resistance sensor per cell, shown in the cell list (detailed view). |                    |
+| `show_title_in_detail`    | `boolean` | No       | Show the card `title` in the detailed view.                        | `true`              |
+| `show_status`             | `boolean` | No       | Detailed view: overall status (Charging / Discharging / Balancing / Idle), derived from power/current and balancing state. | `false` |
+| `balance_led`             | `boolean` | No       | Detailed view: show cell balancing as an LED instead of "bal. on / bal. off". | `false`  |
+| `stat_heater_entity`      | `string`  | No       | Detailed view: heater switch / input_boolean / select, shown next to Charge, Discharge and Balance. |  |
+| `stat_heater_on` / `stat_heater_off` | `string` | No | Custom ON/OFF values for the heater entity (e.g. for selects).  |                     |
+
+> **Units:** Temperatures are shown in the unit of the entity (`°C`/`°F`/`K`). Cell voltages and the cell delta are normalized using the `unit_of_measurement` of the sensor (`V`/`mV`); sensors without a unit fall back to automatic detection.
 
 ### Example configuration
 

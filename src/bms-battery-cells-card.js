@@ -1,5 +1,6 @@
 import de from './lang-de.js';
 import en from './lang-en.js';
+import fr from './lang-fr.js';
 import './chart.umd.min.js';
 
 // Helper um LitElement sicher zu laden
@@ -9,17 +10,29 @@ const css = LitElement.prototype.css;
 
 const ICON_CLOSE = "M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z";
 
-// Selector Konfiguration für Sensoren
+// Selector Konfiguration
+// Hinweis: Alle Eingabefelder laufen über <ha-selector>. <ha-textfield> / <mwc-button> sind im
+// Karten-Editor nicht zuverlässig geladen und wurden dann unsichtbar (nur leerer Platz) dargestellt.
 const sensorSelector = { entity: { domain: "sensor" } };
 const binarySelector = { entity: { domain: ["binary_sensor", "sensor", "input_boolean", "switch"] } };
 const switchSelector = { entity: { domain: ["switch", "input_boolean", "input_select", "binary_sensor", "select"] } };
+const textSelector = { text: {} };
+const voltageSelector = { number: { min: 0, max: 5, step: 0.01, mode: "box", unit_of_measurement: "V" } };
+const opacitySelector = { number: { min: 0, max: 1, step: 0.05, mode: "slider" } };
+const colorSelector = (options) => ({ select: { options, custom_value: true, mode: "dropdown" } });
+
+// Domains, bei denen eigene EIN/AUS-Werte sinnvoll sind (Auswahllisten statt on/off)
+const CUSTOM_STATE_DOMAINS = ["select", "input_select"];
+
+// Lokalisierung mit Fallback auf Englisch pro Schlüssel (verhindert rohe Keys wie "card.delta")
+const LANGS = { de, en, fr };
+const localize = (hass, key) => {
+  const code = (hass?.locale?.language || 'en').split('-')[0];
+  const lookup = (dict) => key.split('.').reduce((o, i) => (o ? o[i] : undefined), dict);
+  return lookup(LANGS[code]) ?? lookup(LANGS.en) ?? key;
+};
 
 class BmsBatteryCellsCardEditor extends LitElement {
-  constructor() {
-    super();
-    this.langs = { de, en };
-  }
-
   static get properties() {
     return {
       hass: {},
@@ -29,72 +42,64 @@ class BmsBatteryCellsCardEditor extends LitElement {
 
   static get styles() {
     return css`
-      .card-config { display: flex; flex-direction: column; gap: 14px; padding: 8px; }
-      .section-header { 
-        font-weight: 600; margin-top: 10px; margin-bottom: 8px; 
-        display: block; border-bottom: 1px solid var(--divider-color); padding-bottom: 4px;
-        color: var(--primary-text-color);
+      .card-config { display: flex; flex-direction: column; gap: 16px; padding: 8px 0; }
+      .section { display: flex; flex-direction: column; gap: 8px; }
+      .section-header {
+        font-weight: 600; display: block; color: var(--primary-text-color);
+        border-bottom: 1px solid var(--divider-color); padding-bottom: 4px; margin-bottom: 4px;
       }
-      .row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-      
+      .sub-header { font-weight: 600; display: block; margin: 4px 0 0; color: var(--primary-text-color); }
+
+      ha-selector { display: block; width: 100%; }
+
+      .switch-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 1px 0; } /* Zeilenabstand ~30px wie in v1.x */
+      .switch-row.highlight { background: rgba(33,150,243,0.1); padding: 4px 8px; border-radius: 6px; font-weight: bold; }
+
+      .field-row { display: flex; align-items: center; gap: 4px; }
+      .field-row ha-selector { flex: 1; min-width: 0; }
+      .clear-btn { color: var(--secondary-text-color); flex-shrink: 0; }
+
+      .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+      .state-values {
+        margin-left: 8px; padding-left: 8px;
+        border-left: 2px solid rgba(33,150,243,0.3);
+      }
+
+      .detailed-options {
+        background: rgba(33, 150, 243, 0.05);
+        border: 1px solid rgba(33, 150, 243, 0.2);
+        border-radius: 8px;
+        padding: 10px;
+        display: flex; flex-direction: column; gap: 8px;
+      }
+
       .list-row {
-        background: var(--secondary-background-color, rgba(0,0,0,0.05)); 
-        padding: 10px; 
-        padding-right: 48px; /* Platz für den Löschen-Button rechts */
-        border-radius: 8px; 
+        background: var(--secondary-background-color, rgba(0,0,0,0.05));
+        padding: 10px; padding-right: 48px; /* Platz für den Löschen-Button */
+        border-radius: 8px;
         border: 1px solid var(--divider-color, rgba(0,0,0,0.1));
-        margin-bottom: 10px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
+        display: flex; flex-direction: column; gap: 8px;
         position: relative;
       }
-
-      .cell-row-top, .cell-row-bottom {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        width: 100%;
-      }
-
-      ha-textfield, ha-selector { 
-          width: 100%; display: block; min-height: 56px; 
-      }
-      
+      .cell-row { display: flex; align-items: center; gap: 10px; width: 100%; }
       .cell-name { width: 90px; flex-shrink: 0; }
-      .cell-spacer { width: 90px; flex-shrink: 0; } /* Leerraum unter dem Namen */
-      .cell-entity { flex: 1; }
-      
-      .add-button { width: 100%; margin-top: 8px; }
-      
-      /* Löschen Button absolut positioniert */
-      .delete-btn { 
-          position: absolute; 
-          top: 50%; 
-          right: 2px; 
-          transform: translateY(-50%);
-          color: var(--error-color); 
-          cursor: pointer; 
-          --mdc-icon-button-size: 36px; 
+      .cell-spacer { width: 90px; flex-shrink: 0; }
+      .cell-entity { flex: 1; min-width: 0; }
+
+      .delete-btn {
+        position: absolute; top: 50%; right: 2px; transform: translateY(-50%);
+        color: var(--error-color); --mdc-icon-button-size: 36px;
       }
-      
-      .detailed-options {
-          background: rgba(33, 150, 243, 0.05);
-          border: 1px solid rgba(33, 150, 243, 0.2);
-          border-radius: 8px;
-          padding: 10px;
-          margin-top: 10px;
+
+      .add-button {
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        width: 100%; padding: 10px; margin-top: 4px;
+        background: transparent; color: var(--primary-color);
+        border: 1px solid var(--primary-color); border-radius: 8px;
+        font: inherit; font-weight: 500; cursor: pointer;
       }
-      
-      .sub-option {
-          margin-top: 8px;
-          margin-left: 8px;
-          padding-left: 8px;
-          border-left: 2px solid rgba(33,150,243,0.3);
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 8px;
-      }
+      .add-button:hover { background: rgba(var(--rgb-primary-color, 33,150,243), 0.08); }
     `;
   }
 
@@ -103,41 +108,30 @@ class BmsBatteryCellsCardEditor extends LitElement {
   }
 
   _localize(key) {
-    const lang = this.hass?.locale?.language || 'en';
-    const code = lang.split('-')[0]; 
-    const dict = this.langs[code] || this.langs['en'];
-    return key.split('.').reduce((o, i) => (o ? o[i] : null), dict) || key;
+    return localize(this.hass, key);
   }
 
   _fireConfigChanged(newConfig) {
-    const event = new CustomEvent("config-changed", {
+    this.dispatchEvent(new CustomEvent("config-changed", {
       detail: { config: newConfig },
       bubbles: true,
       composed: true,
-    });
-    this.dispatchEvent(event);
+    }));
   }
 
-  _valueChanged(ev, key) {
+  // Setzt einen Wert; leere Werte entfernen den Schlüssel, damit die Standardwerte der Karte greifen
+  _setValue(key, value) {
     if (!this._config) return;
-    const configValue = key || ev.target.configValue; 
-    if (!configValue) return;
-
-    let newValue = ev.target.value;
-
-    if (ev.detail && 'value' in ev.detail) {
-        newValue = ev.detail.value;
-    }
-
-    if (ev.target.tagName === 'HA-SWITCH') newValue = ev.target.checked;
-    if (ev.target.type === 'number') newValue = parseFloat(newValue);
-
-    this._fireConfigChanged({ ...this._config, [configValue]: newValue });
+    const newConfig = { ...this._config };
+    const isEmpty = value === undefined || value === null || (value === '' && key !== 'title');
+    if (isEmpty) delete newConfig[key];
+    else newConfig[key] = value;
+    this._fireConfigChanged(newConfig);
   }
 
   _addCell() {
     const newCells = [...(this._config.cells || [])];
-    newCells.push({ name: `${newCells.length + 1}`, entity: '', balance_entity: '' });
+    newCells.push({ name: `${newCells.length + 1}`, entity: '' });
     this._fireConfigChanged({ ...this._config, cells: newCells });
   }
 
@@ -149,167 +143,173 @@ class BmsBatteryCellsCardEditor extends LitElement {
 
   _editCell(index, key, value) {
     const newCells = [...(this._config.cells || [])];
-    newCells[index] = { ...newCells[index], [key]: value };
+    const cell = { ...newCells[index] };
+    if (value === undefined || value === null || value === '') delete cell[key];
+    else cell[key] = value;
+    newCells[index] = cell;
     this._fireConfigChanged({ ...this._config, cells: newCells });
   }
 
-  _clearValue(key) {
-    if (!this._config) return;
-    this._fireConfigChanged({ ...this._config, [key]: '' });
+  // --- Render-Helfer (einheitliche Abstände über .section gap) ---
+  _renderSelector(labelKey, configKey, selector, fallback = undefined) {
+    const value = this._config[configKey] ?? fallback;
+    return html`
+      <ha-selector
+        .label=${this._localize(labelKey)}
+        .hass=${this.hass}
+        .selector=${selector}
+        .value=${value}
+        .required=${false}
+        @value-changed=${(e) => this._setValue(configKey, e.detail.value)}
+      ></ha-selector>
+    `;
   }
 
-  _renderEntitySelector(label, configKey, selector, marginBottom = '8px', marginTop = '0px') {
+  _renderEntitySelector(labelKey, configKey, selector) {
     return html`
-        <div class="row" style="margin-bottom: ${marginBottom}; margin-top: ${marginTop}; align-items: center;">
-            <ha-selector 
-                .label="${this._localize(label)}" 
-                .hass=${this.hass} 
-                .selector=${selector} 
-                .value=${this._config[configKey]} 
-                @value-changed=${(e) => this._valueChanged(e, configKey)}
-                style="flex: 1;"
-            ></ha-selector>
-            ${this._config[configKey] ? html`
-                <ha-icon-button 
-                    .path=${ICON_CLOSE} 
-                    @click=${() => this._clearValue(configKey)}
-                    style="color: var(--secondary-text-color); margin-left: 4px;"
-                ></ha-icon-button>
-            ` : ''}
+      <div class="field-row">
+        ${this._renderSelector(labelKey, configKey, selector)}
+        ${this._config[configKey] ? html`
+          <ha-icon-button class="clear-btn" .path=${ICON_CLOSE} @click=${() => this._setValue(configKey, undefined)}></ha-icon-button>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  // Status-Entität (Laden/Entladen/Balance/Heizung). Eigene EIN/AUS-Werte nur bei Auswahllisten
+  // (select / input_select) oder wenn bereits Werte konfiguriert sind.
+  _renderStateEntity(labelKey, entityKey, onKey, offKey) {
+    const entityId = this._config[entityKey];
+    const domain = entityId ? String(entityId).split('.')[0] : '';
+    const showValues = CUSTOM_STATE_DOMAINS.includes(domain) || this._config[onKey] || this._config[offKey];
+    return html`
+      ${this._renderEntitySelector(labelKey, entityKey, switchSelector)}
+      ${showValues ? html`
+        <div class="state-values grid-2">
+          ${this._renderSelector('editor.val_on', onKey, textSelector)}
+          ${this._renderSelector('editor.val_off', offKey, textSelector)}
         </div>
+      ` : ''}
+    `;
+  }
+
+  _renderSwitch(labelKey, configKey, defaultValue = false, highlight = false) {
+    const checked = defaultValue ? this._config[configKey] !== false : !!this._config[configKey];
+    return html`
+      <div class="switch-row ${highlight ? 'highlight' : ''}">
+        <span>${this._localize(labelKey)}</span>
+        <ha-switch .checked=${checked} @change=${(e) => this._setValue(configKey, e.target.checked)}></ha-switch>
+      </div>
     `;
   }
 
   render() {
     if (!this.hass || !this._config) return html``;
-    const cells = this._config.cells || [];
+    const c = this._config;
+    const cells = c.cells || [];
+    const detailed = !!c.show_detailed_view;
+    // Die Balken-Optionen gelten auch für die Standardansicht unterhalb der Detailansicht
+    const showBarOptions = !detailed || !!c.show_standard_in_detail;
 
     return html`
       <div class="card-config">
-        
-        <ha-textfield
-          label="${this._localize('editor.title')}"
-          .value=${this._config.title || ''}
-          .configValue=${'title'}
-          @input=${this._valueChanged}
-        ></ha-textfield>
 
-        <div>
-            <span class="section-header">${this._localize('editor.display_options')}</span>
-             
-            <div class="row" style="background: rgba(33,150,243,0.1); padding: 8px; border-radius: 4px;">
-                <span style="font-weight:bold;">${this._localize('editor.show_detailed_view')}</span>
-                <ha-switch
-                    .checked=${this._config.show_detailed_view || false}
-                    .configValue=${'show_detailed_view'}
-                    @change=${this._valueChanged}
-                ></ha-switch>
+        ${this._renderSelector('editor.title', 'title', textSelector)}
+
+        <div class="section">
+          <span class="section-header">${this._localize('editor.display_options')}</span>
+          ${this._renderSwitch('editor.show_detailed_view', 'show_detailed_view', false, true)}
+
+          ${detailed ? html`
+            ${this._renderSwitch('editor.show_charts', 'show_charts', true)}
+            ${this._renderSwitch('editor.show_cell_list', 'show_cell_list', true)}
+            ${this._renderSwitch('editor.show_standard_in_detail', 'show_standard_in_detail')}
+            ${this._renderSwitch('editor.show_title_in_detail', 'show_title_in_detail', true)}
+            ${this._renderSwitch('editor.show_status', 'show_status')}
+            ${this._renderSwitch('editor.balance_led', 'balance_led')}
+          ` : ''}
+
+          ${showBarOptions ? html`
+            ${detailed ? html`<span class="sub-header">${this._localize('editor.standard_view_options')}</span>` : ''}
+            <div class="grid-2">
+              ${this._renderSelector('editor.min_voltage', 'min_voltage', voltageSelector, 2.60)}
+              ${this._renderSelector('editor.max_voltage', 'max_voltage', voltageSelector, 3.65)}
             </div>
+            ${!detailed ? this._renderSwitch('editor.show_header_values', 'show_values_on_top') : ''}
+            ${this._renderSwitch('editor.show_as_table', 'show_as_table')}
+            ${this._renderSwitch('editor.hide_bars', 'hide_bars')}
+            ${this._renderSwitch('editor.horizontal_layout', 'horizontal_layout')}
+            ${this._renderSwitch('editor.show_legend', 'show_legend', true)}
+            ${this._renderSwitch('editor.thick_borders', 'thicker_borders')}
+            ${this._renderSwitch('editor.enable_animations', 'enable_animations', true)}
+            ${this._renderSwitch('editor.show_cell_voltages', 'show_values', true)}
+            ${this._renderSwitch('editor.show_min_max', 'show_min_max', true)}
+            ${!detailed ? this._renderSwitch('editor.show_average', 'show_average') : ''}
+            ${!detailed ? this._renderSwitch('editor.calc_drift', 'show_voltage_diff') : ''}
 
-            ${!this._config.show_detailed_view ? html`
-                <div class="row">
-                    <ha-textfield label="${this._localize('editor.min_voltage')}" type="number" step="0.01" .value=${this._config.min_voltage ?? 2.60} .configValue=${'min_voltage'} @input=${this._valueChanged}></ha-textfield>
-                    <div style="width: 16px;"></div>
-                    <ha-textfield label="${this._localize('editor.max_voltage')}" type="number" step="0.01" .value=${this._config.max_voltage ?? 3.65} .configValue=${'max_voltage'} @input=${this._valueChanged}></ha-textfield>
-                </div>
-                <div class="row"><span>${this._localize('editor.show_header_values')}</span><ha-switch .checked=${this._config.show_values_on_top || false} .configValue=${'show_values_on_top'} @change=${this._valueChanged}></ha-switch></div>
-                <div class="row"><span>${this._localize('editor.show_as_table')}</span><ha-switch .checked=${this._config.show_as_table || false} .configValue=${'show_as_table'} @change=${this._valueChanged}></ha-switch></div>
-                <div class="row"><span>${this._localize('editor.hide_bars')}</span><ha-switch .checked=${this._config.hide_bars || false} .configValue=${'hide_bars'} @change=${this._valueChanged}></ha-switch></div>
-                <div class="row"><span>${this._localize('editor.horizontal_layout')}</span><ha-switch .checked=${this._config.horizontal_layout || false} .configValue=${'horizontal_layout'} @change=${this._valueChanged}></ha-switch></div>
-                <div class="row"><span>${this._localize('editor.thick_borders')}</span><ha-switch .checked=${this._config.thicker_borders || false} .configValue=${'thicker_borders'} @change=${this._valueChanged}></ha-switch></div>
-                <div class="row"><span>${this._localize('editor.enable_animations')}</span><ha-switch .checked=${this._config.enable_animations !== false} .configValue=${'enable_animations'} @change=${this._valueChanged}></ha-switch></div>
-                <div class="row"><span>${this._localize('editor.show_cell_voltages')}</span><ha-switch .checked=${this._config.show_values !== false} .configValue=${'show_values'} @change=${this._valueChanged}></ha-switch></div>
-                <div class="row"><span>${this._localize('editor.show_min_max')}</span><ha-switch .checked=${this._config.show_min_max !== false} .configValue=${'show_min_max'} @change=${this._valueChanged}></ha-switch></div>
-                <div class="row"><span>${this._localize('editor.show_average')}</span><ha-switch .checked=${this._config.show_average || false} .configValue=${'show_average'} @change=${this._valueChanged}></ha-switch></div>
-                <div class="row"><span>${this._localize('editor.calc_drift')}</span><ha-switch .checked=${this._config.show_voltage_diff || false} .configValue=${'show_voltage_diff'} @change=${this._valueChanged}></ha-switch></div>
-            ` : ''}
+            <span class="sub-header">${this._localize('editor.colors')}</span>
+            <div class="grid-2">
+              ${this._renderSelector('editor.cell_background_color', 'cell_background_color', colorSelector(['gradient']), 'gradient')}
+              ${this._renderSelector('editor.cell_background_opacity', 'cell_background_opacity', opacitySelector, 0.25)}
+              ${this._renderSelector('editor.cell_bar_color', 'cell_bar_color', colorSelector(['range', 'delta']), 'range')}
+              ${this._renderSelector('editor.cell_bar_opacity', 'cell_bar_opacity', opacitySelector, 0.6)}
+              ${c.cell_bar_color === 'delta' ? html`
+                ${this._renderSelector('editor.cell_bar_top_color', 'cell_bar_top_color', textSelector, '#173117')}
+                ${this._renderSelector('editor.cell_bar_bottom_color', 'cell_bar_bottom_color', textSelector, '#3c2222')}
+              ` : ''}
+            </div>
+          ` : ''}
         </div>
 
-        <div>
-            <span class="section-header">${this._localize('editor.main_sensors')}</span>
-            ${this._renderEntitySelector('editor.soc', 'soc_entity', sensorSelector)}
-            ${this._renderEntitySelector('editor.power', 'watt_entity', sensorSelector)}
-            ${this._renderEntitySelector('editor.voltage', 'total_voltage_entity', sensorSelector)}
-            ${this._renderEntitySelector('editor.current', 'total_current_entity', sensorSelector)}
-            ${this._renderEntitySelector('editor.drift', 'cell_diff_sensor', sensorSelector)}
-            ${this._renderEntitySelector('editor.temp', 'temp_entity', sensorSelector)}
-        
-            ${this._config.show_detailed_view ? html`
-                <div class="detailed-options">
-                    <span style="font-weight:600; display:block; margin-bottom:10px;">${this._localize('editor.detailed_sensors')}</span>
-                    
-                    <div class="row" style="margin-bottom: 10px;">
-                        <span>${this._localize('editor.show_charts') || 'Charts anzeigen'}</span>
-                        <ha-switch
-                            .checked=${this._config.show_charts !== false}
-                            .configValue=${'show_charts'}
-                            @change=${this._valueChanged}
-                        ></ha-switch>
-                    </div>
+        <div class="section">
+          <span class="section-header">${this._localize('editor.main_sensors')}</span>
+          ${this._renderEntitySelector('editor.soc', 'soc_entity', sensorSelector)}
+          ${this._renderEntitySelector('editor.power', 'watt_entity', sensorSelector)}
+          ${this._renderEntitySelector('editor.voltage', 'total_voltage_entity', sensorSelector)}
+          ${this._renderEntitySelector('editor.current', 'total_current_entity', sensorSelector)}
+          ${this._renderEntitySelector('editor.drift', 'cell_diff_sensor', sensorSelector)}
+          ${this._renderEntitySelector('editor.temp', 'temp_entity', sensorSelector)}
 
-                    <div class="row" style="margin-bottom: 10px;">
-                        <span>${this._localize('editor.show_cell_list')}</span>
-                        <ha-switch
-                            .checked=${this._config.show_cell_list !== false}
-                            .configValue=${'show_cell_list'}
-                            @change=${this._valueChanged}
-                        ></ha-switch>
-                    </div>
-
-                    <div class="row" style="margin-bottom: 12px; border-bottom:1px solid rgba(0,0,0,0.1); padding-bottom:8px;">
-                        <span>${this._localize('editor.show_standard_in_detail') || 'Standardansicht anzeigen'}</span>
-                        <ha-switch
-                            .checked=${this._config.show_standard_in_detail || false}
-                            .configValue=${'show_standard_in_detail'}
-                            @change=${this._valueChanged}
-                        ></ha-switch>
-                    </div>
-
-                    ${this._renderEntitySelector('editor.stat_charge', 'stat_charge_entity', switchSelector, '4px')}
-                    <div class="sub-option">
-                         <ha-textfield label="${this._localize('editor.val_on')}" .value=${this._config.stat_charge_on || ''} .configValue=${'stat_charge_on'} @input=${this._valueChanged}></ha-textfield>
-                         <ha-textfield label="${this._localize('editor.val_off')}" .value=${this._config.stat_charge_off || ''} .configValue=${'stat_charge_off'} @input=${this._valueChanged}></ha-textfield>
-                    </div>
-
-                    ${this._renderEntitySelector('editor.stat_discharge', 'stat_discharge_entity', switchSelector, '4px', '12px')}
-                    <div class="sub-option">
-                         <ha-textfield label="${this._localize('editor.val_on')}" .value=${this._config.stat_discharge_on || ''} .configValue=${'stat_discharge_on'} @input=${this._valueChanged}></ha-textfield>
-                         <ha-textfield label="${this._localize('editor.val_off')}" .value=${this._config.stat_discharge_off || ''} .configValue=${'stat_discharge_off'} @input=${this._valueChanged}></ha-textfield>
-                    </div>
-                    
-                    ${this._renderEntitySelector('editor.stat_balance', 'stat_balance_entity', switchSelector, '8px', '12px')}
-                    <div class="sub-option">
-                         <ha-textfield label="${this._localize('editor.val_on')}" .value=${this._config.stat_balance_on || ''} .configValue=${'stat_balance_on'} @input=${this._valueChanged}></ha-textfield>
-                         <ha-textfield label="${this._localize('editor.val_off')}" .value=${this._config.stat_balance_off || ''} .configValue=${'stat_balance_off'} @input=${this._valueChanged}></ha-textfield>
-                    </div>
-                    
-                    ${this._renderEntitySelector('editor.soh', 'soh_entity', sensorSelector)}
-                    ${this._renderEntitySelector('editor.capacity', 'capacity_entity', sensorSelector)}
-                    ${this._renderEntitySelector('editor.cycle_capacity', 'cycle_capacity_entity', sensorSelector)}
-                    ${this._renderEntitySelector('editor.cycles', 'cycle_count_entity', sensorSelector)}
-                    ${this._renderEntitySelector('editor.temp_mos', 'temp_mos_entity', sensorSelector)}
-                </div>
-            ` : ''}
+          ${detailed ? html`
+            <div class="detailed-options">
+              <span class="sub-header" style="margin-top:0;">${this._localize('editor.detailed_sensors')}</span>
+              ${this._renderStateEntity('editor.stat_charge', 'stat_charge_entity', 'stat_charge_on', 'stat_charge_off')}
+              ${this._renderStateEntity('editor.stat_discharge', 'stat_discharge_entity', 'stat_discharge_on', 'stat_discharge_off')}
+              ${this._renderStateEntity('editor.stat_balance', 'stat_balance_entity', 'stat_balance_on', 'stat_balance_off')}
+              ${this._renderStateEntity('editor.stat_heater', 'stat_heater_entity', 'stat_heater_on', 'stat_heater_off')}
+              ${this._renderEntitySelector('editor.soh', 'soh_entity', sensorSelector)}
+              ${this._renderEntitySelector('editor.capacity', 'capacity_entity', sensorSelector)}
+              ${this._renderEntitySelector('editor.cycle_capacity', 'cycle_capacity_entity', sensorSelector)}
+              ${this._renderEntitySelector('editor.cycles', 'cycle_count_entity', sensorSelector)}
+              ${this._renderEntitySelector('editor.temp_mos', 'temp_mos_entity', sensorSelector)}
+            </div>
+          ` : ''}
         </div>
 
-        <div>
-            <span class="section-header">${this._localize('editor.cells')}</span>
-            ${cells.map((cell, index) => html`
-              <div class="list-row">
-                <div class="cell-row-top">
-                    <ha-textfield class="cell-name" label="${this._localize('editor.cell_name')}" .value=${cell.name || ''} @input=${(e) => this._editCell(index, 'name', e.target.value)}></ha-textfield>
-                    <ha-selector class="cell-entity" .label="${this._localize('editor.cell_entity')}" .hass=${this.hass} .selector=${sensorSelector} .value=${cell.entity} @value-changed=${(e) => this._editCell(index, 'entity', e.detail.value)}></ha-selector>
-                </div>
-                <div class="cell-row-bottom">
-                    <div class="cell-spacer"></div>
-                    <ha-selector class="cell-entity" .label="${this._localize('editor.cell_balance_entity')}" .hass=${this.hass} .selector=${binarySelector} .value=${cell.balance_entity} @value-changed=${(e) => this._editCell(index, 'balance_entity', e.detail.value)}></ha-selector>
-                </div>
-                <ha-icon-button class="delete-btn" .path=${ICON_CLOSE} @click=${() => this._removeCell(index)}></ha-icon-button>
+        <div class="section">
+          <span class="section-header">${this._localize('editor.cells')}</span>
+          ${cells.map((cell, index) => html`
+            <div class="list-row">
+              <div class="cell-row">
+                <ha-selector class="cell-name" .label=${this._localize('editor.cell_name')} .hass=${this.hass} .selector=${textSelector} .value=${cell.name ?? ''} .required=${false} @value-changed=${(e) => this._editCell(index, 'name', e.detail.value)}></ha-selector>
+                <ha-selector class="cell-entity" .label=${this._localize('editor.cell_entity')} .hass=${this.hass} .selector=${sensorSelector} .value=${cell.entity} .required=${false} @value-changed=${(e) => this._editCell(index, 'entity', e.detail.value)}></ha-selector>
               </div>
-            `)}
-            <mwc-button class="add-button" outlined @click=${this._addCell}>
-              <ha-icon icon="mdi:plus" style="margin-right: 8px;"></ha-icon> ${this._localize('editor.add_cell')}
-            </mwc-button>
+              <div class="cell-row">
+                <div class="cell-spacer"></div>
+                <ha-selector class="cell-entity" .label=${this._localize('editor.cell_balance_entity')} .hass=${this.hass} .selector=${binarySelector} .value=${cell.balance_entity} .required=${false} @value-changed=${(e) => this._editCell(index, 'balance_entity', e.detail.value)}></ha-selector>
+              </div>
+              ${detailed ? html`
+                <div class="cell-row">
+                  <div class="cell-spacer"></div>
+                  <ha-selector class="cell-entity" .label=${this._localize('editor.cell_resistance_entity')} .hass=${this.hass} .selector=${sensorSelector} .value=${cell.resistance_entity} .required=${false} @value-changed=${(e) => this._editCell(index, 'resistance_entity', e.detail.value)}></ha-selector>
+                </div>
+              ` : ''}
+              <ha-icon-button class="delete-btn" .path=${ICON_CLOSE} @click=${() => this._removeCell(index)}></ha-icon-button>
+            </div>
+          `)}
+          <button class="add-button" @click=${this._addCell}>
+            <ha-icon icon="mdi:plus"></ha-icon> ${this._localize('editor.add_cell')}
+          </button>
         </div>
 
       </div>
@@ -317,10 +317,12 @@ class BmsBatteryCellsCardEditor extends LitElement {
   }
 }
 
-customElements.define("bms-battery-cells-card-editor", BmsBatteryCellsCardEditor);
+if (!customElements.get("bms-battery-cells-card-editor")) {
+  customElements.define("bms-battery-cells-card-editor", BmsBatteryCellsCardEditor);
+}
 
 console.log(
-  "%c🔋 BMS Battery Cells Card v_1.8 loaded",
+  "%c🔋 BMS Battery Cells Card v_2.0 loaded",
   "background: #2ecc71; color: #000; padding: 2px 6px; border-radius: 4px; font-weight: bold;"
 );
 
@@ -339,13 +341,27 @@ class BmsBatteryCellsCard extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         this._initialized = false;
-        
-        if (de && de.card && !de.card.min_cell) de.card.min_cell = "Min Zelle";
-        if (en && en.card && !en.card.min_cell) en.card.min_cell = "Min Cell";
-        
-        this.langs = { de, en };
         this.chartVoltage = null;
         this.chartDelta = null;
+        this._renderToken = 0;
+        this._lastStates = null;
+        this._docClickHandler = null;
+        this._resizeObserver = null;
+    }
+
+    connectedCallback() {
+        // Tooltip-Handler wieder anmelden, falls die Karte erneut eingehängt wird
+        if (this._docClickHandler) document.addEventListener('click', this._docClickHandler);
+    }
+
+    disconnectedCallback() {
+        // Globale Listener entfernen (verhindert Speicherlecks beim Verlassen des Dashboards)
+        if (this._docClickHandler) document.removeEventListener('click', this._docClickHandler);
+    }
+
+    getCardSize() {
+        if (this._config?.show_detailed_view) return 10;
+        return Math.max(2, Math.round((this._config?.card_height || 380) / 50));
     }
 
     static async getConfigElement() {
@@ -361,11 +377,34 @@ class BmsBatteryCellsCard extends HTMLElement {
     }
 
     set hass(hass) {
+        const oldHass = this._hass;
         this._hass = hass;
         if (!this._initialized) {
             this._initRender();
+        } else if (oldHass && !this._relevantStateChanged(oldHass, hass)) {
+            // Home Assistant ruft den Setter bei JEDER Zustandsänderung im System auf.
+            // Nur neu zeichnen, wenn sich eine Entität dieser Karte geändert hat.
+            return;
         }
         this._updateValues();
+    }
+
+    // Alle Entitäten, die diese Karte verwendet
+    _relevantEntities() {
+        if (this._entityCache) return this._entityCache;
+        const c = this._config || {};
+        const ids = new Set();
+        Object.keys(c).forEach(k => { if ((k.endsWith('_entity') || k === 'cell_diff_sensor') && c[k]) ids.add(c[k]); });
+        (c.cells || []).forEach(cell => {
+            ['entity', 'balance_entity', 'resistance_entity'].forEach(k => { if (cell && cell[k]) ids.add(cell[k]); });
+        });
+        this._entityCache = [...ids];
+        return this._entityCache;
+    }
+
+    _relevantStateChanged(oldHass, newHass) {
+        if (oldHass.locale?.language !== newHass.locale?.language) return true;
+        return this._relevantEntities().some(id => oldHass.states[id] !== newHass.states[id]);
     }
 
     setConfig(config) {
@@ -403,15 +442,19 @@ class BmsBatteryCellsCard extends HTMLElement {
             cell_bar_bottom_color: '#3c2222', // hex color string, used if cell_bar_color is 'delta'
             ...config
         };
+        if (!Array.isArray(this._config.cells)) this._config.cells = [];
+        // Title explicitly set by the user (the default title is not shown in the detailed view)
+        this._userTitle = config.title || '';
+        this._entityCache = null;
         this._initialized = false;
-        if (this._hass) this._initRender();
+        if (this._hass) {
+            this._initRender();
+            this._updateValues(); // sonst stehen nach einer Konfigurationsänderung bis zum nächsten Update nur "--" da
+        }
     }
 
     _localize(key) {
-        const lang = this._hass?.locale?.language || 'en';
-        const code = lang.split('-')[0];
-        const dict = this.langs[code] || this.langs['en'];
-        return key.split('.').reduce((o, i) => (o ? o[i] : null), dict) || key;
+        return localize(this._hass, key);
     }
 
     _parseNumber(entityId) {
@@ -428,6 +471,46 @@ class BmsBatteryCellsCard extends HTMLElement {
     _getState(entityId) {
         if (!this._hass || !entityId) return null;
         return this._hass.states[entityId] ? this._hass.states[entityId].state : null;
+    }
+
+    // --- UNIT HELPERS (Issue #5, #12) ---
+    // Unit as reported by Home Assistant (unit_of_measurement), '' if unknown
+    _getUnit(entityId) {
+        if (!this._hass || !entityId) return '';
+        const stateObj = this._hass.states[entityId];
+        const unit = stateObj && stateObj.attributes ? stateObj.attributes.unit_of_measurement : '';
+        return unit ? String(unit).trim() : '';
+    }
+
+    // Temperature: keep the unit of the entity (°C / °F / K), fallback °C
+    _getTempUnit(entityId) {
+        return this._getUnit(entityId) || '°C';
+    }
+
+    // Convert a temperature value to °C (needed for the color thresholds)
+    _tempToCelsius(value, unit) {
+        const u = String(unit || '').toUpperCase();
+        if (u.includes('F')) return (value - 32) * 5 / 9;
+        if (u === 'K') return value - 273.15;
+        return value;
+    }
+
+    // Voltage -> Volt. Uses unit_of_measurement, falls back to the old heuristic (> 80 = mV)
+    _toVolts(entityId, value) {
+        if (value === null || value === undefined || isNaN(value)) return null;
+        const unit = this._getUnit(entityId).toLowerCase();
+        if (unit === 'mv') return value / 1000;
+        if (unit === 'v') return value;
+        return (value > 80) ? value / 1000 : value;
+    }
+
+    // Voltage difference -> millivolt. Uses unit_of_measurement, falls back to the old heuristic (< 1 = Volt)
+    _toMilliVolts(entityId, value) {
+        if (value === null || value === undefined || isNaN(value)) return null;
+        const unit = this._getUnit(entityId).toLowerCase();
+        if (unit === 'mv') return value;
+        if (unit === 'v') return value * 1000;
+        return (value < 1) ? value * 1000 : value;
     }
 
     _fireMoreInfo(entityId) {
@@ -470,8 +553,18 @@ class BmsBatteryCellsCard extends HTMLElement {
         }
     }
 
+    // Diagramme hängen an den Canvas-Elementen -> vor jedem Neu-Rendern (Konfigurationsänderung,
+    // Wechsel Detail-/Standardansicht) sauber abbauen
+    _teardownCharts() {
+        this._renderToken++;
+        if (this.chartVoltage) { this.chartVoltage.destroy(); this.chartVoltage = null; }
+        if (this.chartDelta) { this.chartDelta.destroy(); this.chartDelta = null; }
+        if (this._resizeObserver) { this._resizeObserver.disconnect(); this._resizeObserver = null; }
+    }
+
     _initRender() {
         if (!this._config || !this._hass) return;
+        this._teardownCharts();
         if (this._config.show_detailed_view) {
             this._renderDetailedView();
         } else {
@@ -480,7 +573,7 @@ class BmsBatteryCellsCard extends HTMLElement {
         this._initialized = true;
     }
 
-    async _fetchHistory(entityId, hours = 6) {
+    async _fetchHistory(entityId, hours = 6, convert = null) {
         if (!entityId) return [];
         const endTime = new Date();
         const startTime = new Date(endTime.getTime() - (hours * 60 * 60 * 1000));
@@ -490,28 +583,97 @@ class BmsBatteryCellsCard extends HTMLElement {
                 `history/period/${startTime.toISOString()}?filter_entity_id=${entityId}&end_time=${endTime.toISOString()}&minimal_response`
             );
             if (history && history[0]) {
-                return history[0].map(entry => ({ x: new Date(entry.last_changed).getTime(), y: parseFloat(entry.state) })).filter(pt => !isNaN(pt.y));
+                return history[0]
+                    .map(entry => {
+                        const raw = parseFloat(String(entry.state).replace(',', '.'));
+                        const y = (convert && !isNaN(raw)) ? convert(raw) : raw;
+                        return { x: new Date(entry.last_changed).getTime(), y };
+                    })
+                    .filter(pt => pt.y !== null && !isNaN(pt.y));
             }
             return [];
         } catch (e) { return []; }
     }
 
-    async _initCharts() {
+    // Delta-Verlauf ohne externen Sensor: aus den Verläufen aller Zellspannungen berechnen (Max - Min in mV)
+    async _fetchCellDeltaHistory(hours = 6) {
+        const cells = (this._config.cells || []).filter(c => c && c.entity);
+        if (cells.length < 2) return [];
+        const endTime = new Date();
+        const startTime = new Date(endTime.getTime() - (hours * 60 * 60 * 1000));
+        try {
+            const ids = cells.map(c => c.entity);
+            const history = await this._hass.callApi(
+                "GET",
+                `history/period/${startTime.toISOString()}?filter_entity_id=${ids.join(',')}&end_time=${endTime.toISOString()}&minimal_response&no_attributes`
+            );
+            if (!Array.isArray(history)) return [];
+            // Alle Änderungen chronologisch sortieren und jeweils den letzten Wert pro Zelle fortschreiben
+            const events = [];
+            history.forEach((series) => {
+                if (!Array.isArray(series) || !series.length) return;
+                const entityId = series[0].entity_id;
+                series.forEach(entry => {
+                    const raw = parseFloat(String(entry.state).replace(',', '.'));
+                    events.push({ t: new Date(entry.last_changed).getTime(), id: entityId, v: isNaN(raw) ? null : this._toVolts(entityId, raw) });
+                });
+            });
+            events.sort((a, b) => a.t - b.t);
+            const current = new Map();
+            const points = [];
+            events.forEach(ev => {
+                if (ev.v === null) current.delete(ev.id); else current.set(ev.id, ev.v);
+                if (current.size < ids.length) return; // erst wenn alle Zellen einen Wert haben
+                const vals = [...current.values()];
+                const y = (Math.max(...vals) - Math.min(...vals)) * 1000;
+                const last = points[points.length - 1];
+                if (last && last.x === ev.t) last.y = y; else points.push({ x: ev.t, y });
+            });
+            return points;
+        } catch (e) { return []; }
+    }
+
+    _initCharts() {
+        const token = this._renderToken;
         setTimeout(async () => {
             const cv = this.shadowRoot.getElementById('canvas-voltage');
             const cd = this.shadowRoot.getElementById('canvas-delta');
+            // Abbrechen, wenn inzwischen neu gerendert wurde (sonst landet das Diagramm auf einem alten Canvas)
+            const stale = (canvas) => token !== this._renderToken || !canvas || !canvas.isConnected;
+
             if (cv && this._config.total_voltage_entity && !this.chartVoltage) {
                 const dataV = await this._fetchHistory(this._config.total_voltage_entity, 6);
-                this.chartVoltage = this._createChart(cv, dataV, '#ffa726', 'V');
+                if (!stale(cv)) this.chartVoltage = this._createChart(cv, dataV, '#ffa726', 'V');
             }
-            if (cd && this._config.cell_diff_sensor && !this.chartDelta) {
-                let dataD = await this._fetchHistory(this._config.cell_diff_sensor, 6);
-                this.chartDelta = this._createChart(cd, dataD, '#1e88e5', ''); 
+            if (cd && !this.chartDelta) {
+                let dataD = null;
+                if (this._config.cell_diff_sensor) {
+                    // Issue #5: history values must be normalized to mV, exactly like the live values
+                    const deltaEntity = this._config.cell_diff_sensor;
+                    dataD = await this._fetchHistory(deltaEntity, 6, (v) => this._toMilliVolts(deltaEntity, v));
+                } else if ((this._config.cells || []).length >= 2) {
+                    // Kein externer Sensor: Delta aus den Zellspannungen berechnen
+                    dataD = await this._fetchCellDeltaHistory(6);
+                }
+                if (dataD && !stale(cd)) this.chartDelta = this._createChart(cd, dataD, '#1e88e5', 'mV', 0);
             }
+            this._observeChartSize();
         }, 200);
     }
 
-    _createChart(ctx, data, color, unit = '') {
+    // Diagramme an die Boxbreite anpassen (z. B. Editor-Vorschau, Spaltenwechsel, Seitenleiste)
+    _observeChartSize() {
+        if (this._resizeObserver) this._resizeObserver.disconnect();
+        if (typeof ResizeObserver === 'undefined') return;
+        const containers = this.shadowRoot.querySelectorAll('.chart-container-full');
+        if (!containers.length) return;
+        this._resizeObserver = new ResizeObserver(() => {
+            [this.chartVoltage, this.chartDelta].forEach(ch => { if (ch && ch.canvas && ch.canvas.isConnected) ch.resize(); });
+        });
+        containers.forEach(el => this._resizeObserver.observe(el));
+    }
+
+    _createChart(ctx, data, color, unit = '', fixedDecimals = null) {
         const ChartLib = window.Chart || Chart;
         if (!ChartLib) return null;
         const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 100);
@@ -548,13 +710,15 @@ class BmsBatteryCellsCard extends HTMLElement {
                             title: () => [], 
                             label: (context) => {
                                 let val = context.parsed.y;
-                                const decimals = (val < 10 && val > -10) ? 3 : 2;
+                                const decimals = (fixedDecimals !== null) ? fixedDecimals : ((val < 10 && val > -10) ? 3 : 2);
                                 return val.toFixed(decimals) + (unit ? ' ' + unit : '');
                             }
                         }
                     } 
                 },
-                scales: { x: { type: 'linear', display: false }, y: { display: false } },
+                // bounds 'data': X-Achse exakt vom ersten bis zum letzten Messpunkt. Mit dem Standard 'ticks'
+                // rundet Chart.js auf "schöne" Werte und rechts/links bleibt ein leerer Streifen.
+                scales: { x: { type: 'linear', display: false, bounds: 'data', offset: false }, y: { display: false } },
                 interaction: { mode: 'nearest', axis: 'x', intersect: false }
             }
         });
@@ -563,6 +727,9 @@ class BmsBatteryCellsCard extends HTMLElement {
     _updateChartData(chart, timestamp, value) {
         if (!chart) return;
         const data = chart.data.datasets[0].data;
+        const last = data[data.length - 1];
+        // Gleiche Werte nur alle 5 Minuten erneut speichern (verhindert tausende identische Punkte)
+        if (last && last.y === value && (timestamp - last.x) < 5 * 60 * 1000) return;
         data.push({ x: timestamp, y: value });
         const cutoff = timestamp - (6 * 60 * 60 * 1000);
         while(data.length > 0 && data[0].x < cutoff) { data.shift(); }
@@ -572,7 +739,7 @@ class BmsBatteryCellsCard extends HTMLElement {
     // STANDARD VIEW
     // =========================================================================
     _renderStandardView() {
-        const { title, cells = [], card_height, cell_gap, show_values, min_voltage, max_voltage, thicker_borders, hide_bars, horizontal_layout, show_as_table, cell_bar_opacity, cell_background_opacity } = this._config;
+        const { title, cells = [], card_height, cell_gap, show_values, min_voltage, max_voltage, thicker_borders, hide_bars, horizontal_layout, show_as_table, cell_bar_opacity, cell_background_opacity, container_padding } = this._config;
         const colors = this._getColors();
         const cellCount = cells.length;
         let valDisplay = show_values ? 'inline-block' : 'none';
@@ -596,7 +763,7 @@ class BmsBatteryCellsCard extends HTMLElement {
         const style = `
             <style>
                 :host { display: block; --cell-gap: ${cell_gap}px; --badge-bg-color: rgba(0, 0, 0, 0.5); --val-display: ${valDisplay}; --name-fs: ${nameFontSize}; --name-pad: ${namePadding}; --bar-border-width: ${borderWidth}; --main-display: ${show_as_table || hide_bars ? 'none' : 'flex'}; --main-direction: ${horizontal_layout ? 'column' : 'row'}; --bar-transition: ${horizontal_layout ? 'width' : 'height'} 0.4s ease-out; --legend-direction: ${horizontal_layout ? 'row' : 'column'}; --legend-align: ${horizontal_layout ? 'space-between' : 'space-between'}; --legend-border: ${horizontal_layout ? 'none' : '1px solid rgba(255,255,255,0.1)'}; --legend-border-top: ${horizontal_layout ? '1px solid rgba(255,255,255,0.1)' : 'none'}; }
-                ha-card { display: flex; flex-direction: column; z-index: 0; height: ${(hide_bars || horizontal_layout || show_as_table) ? 'auto' : card_height + 'px'}; padding: 16px; box-sizing: border-box; position: relative; color: ${colors.text}; overflow: hidden; }
+                ha-card { display: flex; flex-direction: column; z-index: 0; height: ${(hide_bars || horizontal_layout || show_as_table) ? 'auto' : card_height + 'px'}; padding: ${Number.isFinite(Number(container_padding)) ? Number(container_padding) : 16}px; box-sizing: border-box; position: relative; color: ${colors.text}; overflow: hidden; }
                 .header.card-header { display: grid; grid-template-areas: "title stats" "subinfo stats"; grid-template-columns: 1fr auto; align-items: center; margin-bottom: 12px; flex-shrink: 0; padding-bottom: 8px; border-bottom: ${(hide_bars && !show_as_table) ? 'none' : '1px solid rgba(255,255,255,0.05)'}; }
                 .title { grid-area: title; font-size: 1.3rem; font-weight: 500; letter-spacing: 0.5px; margin-top: -4px; }			
 				.sub-info-row { grid-area: subinfo; display: flex; gap: 12px; align-items: center; font-size: 1.125rem; color: var(--secondary-text-color); margin-top: 2px; }
@@ -624,6 +791,7 @@ class BmsBatteryCellsCard extends HTMLElement {
                 .cell-track-bg { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: ${this._getCellBackground()}; opacity: ${cell_background_opacity}; z-index: 0; border-radius: 6px; overflow: hidden; }
                 .cell-bar { position: absolute; ${horizontal_layout ? 'top: 0; bottom: 0; left: 0;' : 'bottom: 0; left: 0; right: 0;'} background: pink; ${horizontal_layout ? 'border-right: var(--bar-border-width) solid rgba(255, 255, 255, 0.6);' : 'border-top: var(--bar-border-width) solid rgba(255, 255, 255, 0.6);'} z-index: 1; transition: var(--bar-transition); ${horizontal_layout ? 'border-radius: 0 4px 4px 0;' : 'border-radius: 4px 4px 0 0;'} opacity: ${cell_bar_opacity}; box-shadow: 0 -2px 8px rgba(0,0,0,0.3); overflow: hidden; }
                 .cell-bar.is-charging .charging-overlay { opacity: 1; animation: ${horizontal_layout ? 'shimmer-move-right' : 'shimmer-move-up'} 2s infinite linear; }
+                .cell-bar.is-discharging .charging-overlay { opacity: 1; animation: ${horizontal_layout ? 'shimmer-move-right' : 'shimmer-move-up'} 2s infinite linear reverse; }
                 @keyframes shimmer-move-up { 0% { transform: translateY(100%); } 100% { transform: translateY(-100%); } } @keyframes shimmer-move-right { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
                 .charging-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to ${horizontal_layout ? 'right' : 'top'}, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 40%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0.15) 60%, rgba(255,255,255,0) 100%); z-index: 2; transform: ${horizontal_layout ? 'translateX(-100%)' : 'translateY(100%)'}; opacity: 0; pointer-events: none; }
                 .cell-info-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; ${horizontal_layout ? 'display: flex; align-items: center; justify-content: space-between; padding: 0 8px;' : ''} }
@@ -639,20 +807,38 @@ class BmsBatteryCellsCard extends HTMLElement {
             </style>
         `;
         let containerHtml = '';
-        if (show_as_table) { containerHtml = `<div class="table-container">${cells.map((cell, index) => `<div class="table-item" id="table-item-${index}"><span class="table-name">${cell.name || (index+1)}</span><span class="table-val" id="table-val-${index}">-</span></div>`).join('')}</div>`; } 
+        if (show_as_table) { containerHtml = `<div class="table-container">${cells.map((cell, index) => `<div class="table-item" id="table-item-${index}"><span class="table-name">${this._esc(cell.name || (index+1))}</span><span class="table-val" id="table-val-${index}">-</span></div>`).join('')}</div>`; } 
         else if (!horizontal_layout) { containerHtml = `<div class="main-container cells-container">${this._config.show_legend ? `<div class="legend-col">${scaleLabels.map(l => `<span>${l}</span>`).join('')}</div>` : ''}${cells.map((cell, index) => this._renderCellHtml(cell, index)).join('')}</div>`; } 
         else { containerHtml = `<div class="main-container cells-container">${cells.map((cell, index) => this._renderCellHtml(cell, index)).join('')}${this._config.show_legend ? `<div class="legend-col">${scaleLabels.map(l => `<span>${l}</span>`).join('')}</div>` : ''}</div>`; }
-        const html = `<ha-card><div class="header card-header"><div class="title">${title}</div><div class="sub-info-row" id="sub-info-container"></div><div class="stats" id="stats-container"></div></div>${containerHtml}</ha-card>`;
+        const html = `<ha-card><div class="header card-header"><div class="title">${this._esc(title)}</div><div class="sub-info-row" id="sub-info-container"></div><div class="stats" id="stats-container"></div></div>${containerHtml}</ha-card>`;
         this.shadowRoot.innerHTML = style + html;
         this._setupTooltips();
     }
 
     _renderCellHtml(cell, index) {
-        return `<div class="cell-wrapper cell-item" id="cell-wrap-${index}"><div class="custom-tooltip" id="tooltip-${index}">-</div><div class="cell-track-bg"></div><div class="cell-bar" id="bar-${index}" style="height: 0%; width: 0%;"><div class="charging-overlay"></div></div><div class="cell-info-layer">${this._config.horizontal_layout ? `<div class="cell-name-wrap"><span class="cell-name-badge">${cell.name}</span></div><div class="cell-val-wrap"><span class="cell-val-badge cell-voltage" id="val-${index}">-</span></div>` : `<div class="cell-val-wrap"><span class="cell-val-badge cell-voltage" id="val-${index}">-</span></div><div class="cell-name-wrap"><span class="cell-name-badge">${cell.name}</span></div>`}</div></div>`;
+        return `<div class="cell-wrapper cell-item" id="cell-wrap-${index}"><div class="custom-tooltip" id="tooltip-${index}">-</div><div class="cell-track-bg"></div><div class="cell-bar" id="bar-${index}" style="height: 0%; width: 0%;"><div class="charging-overlay"></div></div><div class="cell-info-layer">${this._config.horizontal_layout ? `<div class="cell-name-wrap"><span class="cell-name-badge">${this._esc(cell.name || (index + 1))}</span></div><div class="cell-val-wrap"><span class="cell-val-badge cell-voltage" id="val-${index}">-</span></div>` : `<div class="cell-val-wrap"><span class="cell-val-badge cell-voltage" id="val-${index}">-</span></div><div class="cell-name-wrap"><span class="cell-name-badge">${this._esc(cell.name || (index + 1))}</span></div>`}</div></div>`;
     }
 
     _setupTooltips() {
-        const wrappers = this.shadowRoot.querySelectorAll('.cell-wrapper'); wrappers.forEach(el => { el.addEventListener('click', (e) => { e.stopPropagation(); wrappers.forEach(w => { if (w !== el) w.classList.remove('show-tooltip'); }); el.classList.toggle('show-tooltip'); }); }); document.addEventListener('click', () => { wrappers.forEach(w => w.classList.remove('show-tooltip')); });
+        const wrappers = this.shadowRoot.querySelectorAll('.cell-wrapper');
+        wrappers.forEach(el => {
+            el.addEventListener('click', (e) => {
+                e.stopPropagation();
+                wrappers.forEach(w => { if (w !== el) w.classList.remove('show-tooltip'); });
+                el.classList.toggle('show-tooltip');
+            });
+        });
+        // Nur EIN globaler Listener pro Karte (vorher kam bei jedem Rendern ein weiterer dazu)
+        if (!this._docClickHandler) {
+            this._docClickHandler = () => {
+                this.shadowRoot.querySelectorAll('.cell-wrapper.show-tooltip').forEach(w => w.classList.remove('show-tooltip'));
+            };
+            document.addEventListener('click', this._docClickHandler);
+        }
+    }
+
+    _esc(value) {
+        return String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
     }
 
     _updateStandardValues() {
@@ -668,7 +854,7 @@ class BmsBatteryCellsCard extends HTMLElement {
         cells.forEach((cell, index) => {
             const val = this._parseNumber(cell.entity);
             if (val !== null) {
-                const v = (val > 80) ? val / 1000 : val;
+                const v = this._toVolts(cell.entity, val);
                 cellValues[index] = v;
                 if (v < minV) {
                     minV = v;
@@ -719,9 +905,12 @@ class BmsBatteryCellsCard extends HTMLElement {
                     el.className = 'sub-info-item';
                     const valNum = parseFloat(temp);
                     const valFormatted = isNaN(valNum) ? '0.00' : valNum.toFixed(2);
-                    const tColor = (valNum < 12) ? '#42a5f5' : ((valNum > 28) ? '#ef5350' : 'var(--secondary-text-color)');
+                    // Issue #12: use the unit of the entity (°C / °F / K); thresholds are always evaluated in °C
+                    const tUnit = this._getTempUnit(temp_entity);
+                    const tCelsius = this._tempToCelsius(valNum, tUnit);
+                    const tColor = (tCelsius < 12) ? '#42a5f5' : ((tCelsius > 28) ? '#ef5350' : 'var(--secondary-text-color)');
                     el.style.color = tColor;
-                    const content = `<ha-icon icon="mdi:thermometer" style="${'color:'+tColor }"></ha-icon><span>${valFormatted}°C</span>`;
+                    const content = `<ha-icon icon="mdi:thermometer" style="${'color:'+tColor }"></ha-icon><span>${valFormatted}${tUnit}</span>`;
                     if(el.innerHTML !== content) el.innerHTML = content;
                     el.onclick = (e) => { e.stopPropagation(); this._fireMoreInfo(temp_entity); };
                 });
@@ -731,8 +920,8 @@ class BmsBatteryCellsCard extends HTMLElement {
         const statsContainer = this.shadowRoot.getElementById('stats-container');
         if (statsContainer) {
             const socValRaw = this._parseNumber(soc_entity);
-            let diffVal = this._parseNumber(cell_diff_sensor);
-            if (diffVal !== null && diffVal < 1) diffVal *= 1000;
+            // Issue #5: normalize delta to mV via unit_of_measurement (fallback: value < 1 = Volt)
+            const diffVal = this._toMilliVolts(cell_diff_sensor, this._parseNumber(cell_diff_sensor));
             
             let idx = 0;
             const updateElement = (container, id, index, renderFn) => {
@@ -760,7 +949,8 @@ class BmsBatteryCellsCard extends HTMLElement {
                     const valStr = socValRaw !== null ? `${Math.round(socValRaw)}%` : '--';
                     const color = (socValRaw !== null && socValRaw < 20) ? '#ef5350' : ((socValRaw !== null && socValRaw < 50) ? '#ffa726' : '#66bb6a');
                     const socInt = Math.round(socValRaw);
-                    const iconName = socInt >= 95 ? 'mdi:battery' : `mdi:battery-${Math.round(socInt/10)*10}`;
+                    const socStep = Math.round(socInt / 10) * 10;
+                    const iconName = socValRaw === null ? 'mdi:battery-unknown' : (socInt >= 95 ? 'mdi:battery' : (socStep <= 0 ? 'mdi:battery-outline' : `mdi:battery-${socStep}`));
                     const content = `<span class="stat-label">${this._localize('card.soc')}</span><div class="${rowClass}" style="color: ${color}"><ha-icon icon="${iconName}"></ha-icon><span>${valStr}</span></div>`;
                     if(el.innerHTML !== content) el.innerHTML = content;
                     el.onclick = (e) => { e.stopPropagation(); this._fireMoreInfo(soc_entity); };
@@ -899,11 +1089,9 @@ class BmsBatteryCellsCard extends HTMLElement {
                 }
 
                 // --- BAR ANIMATION LOGIC ---
-                const isCharging = cell.charge_state === 'Charging';
-                const isDischarging = cell.charge_state === 'Discharging';
-                bar.classList.remove('is-charging', 'is-discharging');
-                if      (isCharging)    bar.classList.add('is-charging');
-                else if (isDischarging) bar.classList.add('is-discharging');
+                // (vorher: cell.charge_state - wird nirgends gesetzt, dadurch lief die Animation nie)
+                bar.classList.toggle('is-charging', isCharging);
+                bar.classList.toggle('is-discharging', isDischarging);
                 
                 // --- VALUE LOGIC ---
                 valLabel.innerText = displayVal;
@@ -915,7 +1103,8 @@ class BmsBatteryCellsCard extends HTMLElement {
     // DETAILED VIEW (Dashboard)
     // =========================================================================
     _renderDetailedView() {
-        
+
+
         const { cells = [], show_cell_list, show_charts, show_standard_in_detail, card_height, cell_gap, show_values, min_voltage, max_voltage, thicker_borders, hide_bars, horizontal_layout, show_as_table, cell_bar_opacity, cell_background_opacity } = this._config;
         const colors = this._getColors();
         
@@ -960,6 +1149,7 @@ class BmsBatteryCellsCard extends HTMLElement {
                 .cell-track-bg { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: ${this._getCellBackground()}; opacity: ${cell_background_opacity}; z-index: 0; border-radius: 6px; overflow: hidden; }
                 .cell-bar { position: absolute; ${horizontal_layout ? 'top: 0; bottom: 0; left: 0;' : 'bottom: 0; left: 0; right: 0;'} background: pink; ${horizontal_layout ? 'border-right: var(--bar-border-width) solid rgba(255, 255, 255, 0.6);' : 'border-top: var(--bar-border-width) solid rgba(255, 255, 255, 0.6);'} z-index: 1; transition: var(--bar-transition); ${horizontal_layout ? 'border-radius: 0 4px 4px 0;' : 'border-radius: 4px 4px 0 0;'} opacity: ${cell_bar_opacity}; box-shadow: 0 -2px 8px rgba(0,0,0,0.3); overflow: hidden; }
                 .cell-bar.is-charging .charging-overlay { opacity: 1; animation: ${horizontal_layout ? 'shimmer-move-right' : 'shimmer-move-up'} 2s infinite linear; }
+                .cell-bar.is-discharging .charging-overlay { opacity: 1; animation: ${horizontal_layout ? 'shimmer-move-right' : 'shimmer-move-up'} 2s infinite linear reverse; }
                 @keyframes shimmer-move-up { 0% { transform: translateY(100%); } 100% { transform: translateY(-100%); } } @keyframes shimmer-move-right { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
                 .charging-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to ${horizontal_layout ? 'right' : 'top'}, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 40%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0.15) 60%, rgba(255,255,255,0) 100%); z-index: 2; transform: ${horizontal_layout ? 'translateX(-100%)' : 'translateY(100%)'}; opacity: 0; pointer-events: none; }
                 .cell-info-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; ${horizontal_layout ? 'display: flex; align-items: center; justify-content: space-between; padding: 0 8px;' : ''} }
@@ -970,7 +1160,7 @@ class BmsBatteryCellsCard extends HTMLElement {
              `;
              
             if (show_as_table) {
-                standardHtml = `<div class="standard-view-wrapper"><div class="table-container">${cells.map((cell, index) => `<div class="table-item" id="table-item-${index}"><span class="table-name">${cell.name || (index + 1)}</span><span class="table-val" id="table-val-${index}">-</span></div>`).join('')}</div></div>`;
+                standardHtml = `<div class="standard-view-wrapper"><div class="table-container">${cells.map((cell, index) => `<div class="table-item" id="table-item-${index}"><span class="table-name">${this._esc(cell.name || (index + 1))}</span><span class="table-val" id="table-val-${index}">-</span></div>`).join('')}</div></div>`;
             } 
             else if (!horizontal_layout) {
                 standardHtml = `<div class="standard-view-wrapper"><div class="main-container cells-container">${this._config.show_legend ? `<div class="legend-col">${scaleLabels.map(l => `<span>${l}</span>`).join('')}</div>` : ''}${cells.map((cell, index) => this._renderCellHtml(cell, index)).join('')}</div></div>`;
@@ -992,7 +1182,7 @@ class BmsBatteryCellsCard extends HTMLElement {
                 .col-2 { grid-template-columns: 1fr 1fr; }
                 .col-3 { grid-template-columns: 1fr 1fr 1fr; }
                 
-                .box { background: rgba(var(--rgb-primary-text-color), 0.04); border-radius: 8px; padding: 10px 14px; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+                .box { background: rgba(var(--rgb-primary-text-color), 0.04); border-radius: 8px; padding: 10px 14px; display: flex; flex-direction: column; position: relative; overflow: hidden; min-width: 0; }
                 .clickable { cursor: pointer; transition: background 0.2s; }
                 .clickable:active { background: rgba(var(--rgb-primary-text-color), 0.08); }
                 
@@ -1005,13 +1195,22 @@ class BmsBatteryCellsCard extends HTMLElement {
                 .max-val-red { color: #e53935; font-weight: bold; }
                 .min-val-blue { color: #1e88e5; font-weight: bold; }
                 
+                /* Diagramm randlos über die volle Boxbreite: negative Ränder gleichen das Box-Padding (14px) aus.
+                   Das Canvas liegt absolut im Container, damit Chart.js immer die Containergröße übernimmt. */
                 .chart-container-full {
-                    flex: 1; 
-                    position: relative; 
-                    width: calc(100% + 28px); /* 100% + 2*padding(14px) */
-                    margin-left: -14px; 
-                    margin-right: -14px;
+                    flex: 1 1 auto;
+                    position: relative;
+                    align-self: stretch;
+                    width: auto;
+                    min-width: 0;
+                    min-height: 0;
+                    margin: 0 -14px;
                     overflow: hidden;
+                }
+                .chart-container-full canvas {
+                    position: absolute; top: 0; left: 0;
+                    width: 100% !important; height: 100% !important;
+                    display: block;
                 }
                 
                 .status-row { display: flex; gap: 12px; width: 100%; }
@@ -1045,6 +1244,14 @@ class BmsBatteryCellsCard extends HTMLElement {
                 .cell-num { color: var(--secondary-text-color); margin-right: 6px; width: 24px; }
                 .cell-v { font-weight: bold; font-family: monospace; }
                 .cell-bal { color: var(--secondary-text-color); font-size: 0.75rem; margin-left: 4px; }
+                .cell-res { color: var(--secondary-text-color); font-size: 0.75rem; margin-left: auto; margin-right: 8px; align-self: center; }
+                .bal-led { display: inline-block; width: 10px; height: 10px; border-radius: 50%; vertical-align: middle; background: var(--disabled-text-color, #9e9e9e); opacity: 0.5; }
+                .bal-led.on { background: #4caf50; opacity: 1; box-shadow: 0 0 6px #4caf50; }
+                .detail-title { font-size: 1.3rem; font-weight: 500; letter-spacing: 0.5px; padding: 0 4px; }
+                .status-summary { justify-content: center; align-items: center; flex-direction: row; gap: 8px; padding: 10px; font-size: 0.9rem; font-weight: 500; }
+                .status-summary .status-val { font-weight: 700; }
+                .status-row.has-heater { flex-wrap: wrap; }
+                .status-row.has-heater .status-pill { flex: 1 1 40%; }
                 
                 @media (max-width: 500px) { .col-3 { grid-template-columns: 1fr; } .cell-list-grid { grid-template-columns: 1fr; } }
                 
@@ -1052,8 +1259,12 @@ class BmsBatteryCellsCard extends HTMLElement {
             </style>
         `;
 
+        // Issue #3: title in the detailed view (only if the user has set one and it is not switched off)
+        const detailTitle = (this._userTitle && this._config.show_title_in_detail !== false) ? this._userTitle : '';
+
         const html = `
             <ha-card>
+                ${detailTitle ? `<div class="detail-title">${this._esc(detailTitle)}</div>` : ''}
                 ${show_charts !== false ? `
                 <div class="row col-2">
                     <div class="box chart-box clickable" data-entity="${this._config.total_voltage_entity}" id="chart-voltage">
@@ -1084,16 +1295,27 @@ class BmsBatteryCellsCard extends HTMLElement {
                 </div>
                 ` : ''}
 
-                <div class="status-row">
-                    <div class="status-pill interactive" id="btn-charge">
+                ${this._config.show_status ? `
+                <div class="box status-summary">
+                    <span>${this._localize('card.status')} :</span> <span class="status-val" id="d-status">--</span>
+                </div>
+                ` : ''}
+
+                <div class="status-row ${this._config.stat_heater_entity ? 'has-heater' : ''}">
+                    <div class="status-pill" id="btn-charge">
                         <span>${this._localize('card.charge')} :</span> <span class="status-val" id="d-stat-charge">--</span>
                     </div>
-                    <div class="status-pill interactive" id="btn-discharge">
+                    <div class="status-pill" id="btn-discharge">
                         <span>${this._localize('card.discharge')} :</span> <span class="status-val" id="d-stat-discharge">--</span>
                     </div>
                     <div class="status-pill" id="btn-balance">
                         <span>${this._localize('card.balance')} :</span> <span class="status-val" id="d-stat-balance">--</span>
                     </div>
+                    ${this._config.stat_heater_entity ? `
+                    <div class="status-pill" id="btn-heater">
+                        <span>${this._localize('card.heater')} :</span> <span class="status-val" id="d-stat-heater">--</span>
+                    </div>
+                    ` : ''}
                 </div>
 
                 <div class="row col-3">
@@ -1149,6 +1371,10 @@ class BmsBatteryCellsCard extends HTMLElement {
              e.stopPropagation(); this._handleSwitchAction(this._config.stat_discharge_entity, this._config.stat_discharge_on, this._config.stat_discharge_off);
         });
 
+        this.shadowRoot.getElementById('btn-heater')?.addEventListener('click', (e) => {
+             e.stopPropagation(); this._handleSwitchAction(this._config.stat_heater_entity, this._config.stat_heater_on, this._config.stat_heater_off);
+        });
+
         this.shadowRoot.getElementById('btn-balance')?.addEventListener('click', (e) => {
              e.stopPropagation(); 
              if(this._config.stat_balance_entity) {
@@ -1159,9 +1385,7 @@ class BmsBatteryCellsCard extends HTMLElement {
         this._initCharts();
     }
 
-    _updateColors() {
-        return { bg: 'var(--card-background-color, #1c1c1e)', text: 'var(--primary-text-color, #ffffff)', textSecondary: 'var(--secondary-text-color, #9e9e9e)' };
-    }
+
 
     _getCellBackground() { 
         const { horizontal_layout, cell_background_color} = this._config;
@@ -1206,7 +1430,9 @@ class BmsBatteryCellsCard extends HTMLElement {
         };
     }
 
-    _getColors() { return this._updateColors(); }
+    _getColors() {
+        return { bg: 'var(--card-background-color, #1c1c1e)', text: 'var(--primary-text-color, #ffffff)', textSecondary: 'var(--secondary-text-color, #9e9e9e)' };
+    }
 
     _updateValues() {
         if (!this._initialized || !this._hass) return;
@@ -1243,11 +1469,13 @@ class BmsBatteryCellsCard extends HTMLElement {
         const leftList = []; const rightList = [];
         
         const addIfConf = (list, confKey, labelKey, unit, isTemp=false, fixed=null) => {
-            if (!c[confKey]) return; 
+            if (!c[confKey]) return;
             let val = this._parseNumber(c[confKey]);
             if (val !== null && fixed !== null) {
                 val = val.toFixed(fixed);
             }
+            // Issue #12: temperatures use the unit of the entity (°C / °F / K)
+            if (isTemp) unit = this._getTempUnit(c[confKey]);
 
             const valStr = val !== null ? val + (unit ? ' ' + unit : '') : '--';
             const cls = isTemp ? 'detail-val-txt temp' : 'detail-val-txt';
@@ -1262,7 +1490,7 @@ class BmsBatteryCellsCard extends HTMLElement {
         c.cells.forEach((cell, i) => {
             const v = this._parseNumber(cell.entity);
             if (v !== null) {
-                const val = (v > 80) ? v / 1000 : v;
+                const val = this._toVolts(cell.entity, v);
                 if (val < minV) { minV = val; minIdx = i; }
                 if (val > maxV) { maxV = val; maxIdx = i; }
                 cellSum += val; cellCnt++;
@@ -1282,9 +1510,9 @@ class BmsBatteryCellsCard extends HTMLElement {
         }
         addIfConf(rightList, 'cycle_count_entity', 'card.cycle_count', '');
         
-        let deltaDisplay = delta;
-        if (delta === null && maxV > 0 && minV < 999) deltaDisplay = (maxV - minV) * 1000;
-        else if (delta !== null && delta < 1) deltaDisplay = delta * 1000;
+        // Issue #5: delta always in mV (unit_of_measurement of the sensor, fallback: value < 1 = Volt)
+        let deltaDisplay = this._toMilliVolts(c.cell_diff_sensor, delta);
+        if (deltaDisplay === null && maxV > 0 && minV < 999) deltaDisplay = (maxV - minV) * 1000;
         const deltaStr = deltaDisplay !== null ? (deltaDisplay/1000).toFixed(3) + ' V' : '--';
         const deltaEnt = c.cell_diff_sensor || '';
         const deltaClass = deltaEnt ? 'detail-item clickable' : 'detail-item';
@@ -1310,36 +1538,53 @@ class BmsBatteryCellsCard extends HTMLElement {
         setTxt('d-max-cell-idx', maxIdx !== -1 ? (c.cells[maxIdx].name || (maxIdx+1)) : '--');
         setTxt('d-min-cell-idx', minIdx !== -1 ? (c.cells[minIdx].name || (minIdx+1)) : '--');
         
-        const stChg  = this._getState(c.stat_charge_entity);
-        const stDsg  = this._getState(c.stat_discharge_entity);
         const stBal  = this._getState(c.stat_balance_entity);
-        
+
         // --- CHECK GLOBAL BALANCE STATE ---
         const isBalGlobal = isStateOn(stBal, c.stat_balance_on);
 
-        const setStatus = (id, state, customOn) => {
+        // --- OVERALL STATUS (Issue #3): charging / discharging / balancing / idle ---
+        if (c.show_status) {
+            const statusEl = this.shadowRoot.getElementById('d-status');
+            if (statusEl) {
+                const anyCellBalancing = c.cells.some(cell => cell.balance_entity && isStateOn(this._getState(cell.balance_entity)));
+                const balancing = isBalGlobal || anyCellBalancing;
+                // positive = charging, negative = discharging (same convention as the rest of the card)
+                let flow = null;
+                if (pTotal !== null && Math.abs(pTotal) > 0.1) flow = pTotal;
+                else if (iTotal !== null && Math.abs(iTotal) > 0.05) flow = iTotal;
+                const parts = []; let color = 'var(--secondary-text-color)';
+                if (flow !== null && flow > 0)      { parts.push(this._localize('card.status_charging')); color = '#43a047'; }
+                else if (flow !== null && flow < 0) { parts.push(this._localize('card.status_discharging')); color = '#03a9f4'; }
+                if (balancing) { parts.push(this._localize('card.status_balancing')); if (flow === null) color = '#ffa726'; }
+                if (parts.length === 0) parts.push(this._localize('card.status_idle'));
+                statusEl.innerText = parts.join(' + ');
+                statusEl.style.color = color;
+            }
+        }
+
+        // Status-Pills: ohne Entität "--" (vorher irreführend "AUS"), klickbar nur bei schaltbaren Domains
+        const TOGGLE_DOMAINS = ['switch', 'input_boolean', 'light', 'select', 'input_select'];
+        const setStatus = (id, entityId, customOn) => {
             const el = this.shadowRoot.getElementById(id);
             if (!el) return;
-            const isOn = isStateOn(state, customOn);
+            const pill = el.parentElement;
+            if (!entityId) {
+                el.innerText = '--';
+                el.className = 'status-val';
+                if (pill) pill.classList.remove('interactive');
+                return;
+            }
+            const isOn = isStateOn(this._getState(entityId), customOn);
             el.innerText = isOn ? this._localize('card.on') : this._localize('card.off');
             el.className = `status-val ${isOn ? 'status-on' : 'status-off'}`;
-            if(el.parentElement) {
-                if(id === 'd-stat-balance') {
-                     if(c.stat_balance_entity) {
-                         el.parentElement.classList.add('interactive');
-                         el.parentElement.style.opacity = '1';
-                     } else {
-                         el.parentElement.classList.remove('interactive');
-                     }
-                } else {
-                    el.parentElement.className = `status-pill interactive`;
-                }
-            }
+            if (pill) pill.classList.toggle('interactive', TOGGLE_DOMAINS.includes(String(entityId).split('.')[0]));
         };
 
-        setStatus('d-stat-charge', stChg, c.stat_charge_on);
-        setStatus('d-stat-discharge', stDsg, c.stat_discharge_on);
-        setStatus('d-stat-balance', stBal, c.stat_balance_on);
+        setStatus('d-stat-charge', c.stat_charge_entity, c.stat_charge_on);
+        setStatus('d-stat-discharge', c.stat_discharge_entity, c.stat_discharge_on);
+        setStatus('d-stat-balance', c.stat_balance_entity, c.stat_balance_on);
+        setStatus('d-stat-heater', c.stat_heater_entity, c.stat_heater_on);
 
         setTxt('d-big-volt', (vTotal !== null ? vTotal.toFixed(2) : '--') + ' <span style="font-size:0.7em">V</span>');
         setTxt('d-big-curr', (iTotal !== null ? iTotal.toFixed(2) : '--') + ' <span style="font-size:0.7em">A</span>');
@@ -1357,10 +1602,11 @@ class BmsBatteryCellsCard extends HTMLElement {
             let cellListHtml = [[], []];
             
             // --- Generate HTML List (Hybrid Logic) ---
+            const showResistance = c.cells.some(cell => cell.resistance_entity);
             c.cells.forEach((cell, i) => {
                 const v = this._parseNumber(cell.entity);
                 if (v !== null) {
-                    const val = (v > 80) ? v / 1000 : v;
+                    const val = this._toVolts(cell.entity, v);
                     const colIdx = i < Math.ceil(c.cells.length/2) ? 0 : 1;
                     
                     // --- HYBRID BALANCING LOGIC START ---
@@ -1374,14 +1620,33 @@ class BmsBatteryCellsCard extends HTMLElement {
                     }
                     
                     let balText = 'bal. off';
-                    let balStyle = ''; 
-                    
+                    let balStyle = '';
+
                     if (isCellBalancing) {
                         balText = 'bal. on';
-                        balStyle = 'color: #4caf50; font-weight: bold;'; 
+                        balStyle = 'color: #4caf50; font-weight: bold;';
                     }
-                    
-                    cellListHtml[colIdx].push(`<div class="cell-text-row clickable" data-entity="${cell.entity}"><span><span class="cell-num">${String(i+1).padStart(2,'0')}.</span><span class="cell-v">${val.toFixed(3)} V</span></span><span class="cell-bal" style="${balStyle}">${balText}</span></div>`);
+
+                    // Issue #3: optional LED instead of the "bal. on / bal. off" text
+                    const balHtml = c.balance_led
+                        ? `<span class="cell-bal"><span class="bal-led ${isCellBalancing ? 'on' : 'off'}" title="${balText}"></span></span>`
+                        : `<span class="cell-bal" style="${balStyle}">${balText}</span>`;
+
+                    // Issue #3: optional internal resistance per cell
+                    let resHtml = '';
+                    if (showResistance) {
+                        let resStr = '';
+                        if (cell.resistance_entity) {
+                            const r = this._parseNumber(cell.resistance_entity);
+                            if (r !== null) {
+                                const rUnit = this._getUnit(cell.resistance_entity);
+                                resStr = `${parseFloat(r.toFixed(2))}${rUnit ? ' ' + rUnit : ''}`;
+                            } else resStr = '--';
+                        }
+                        resHtml = `<span class="cell-res clickable" ${cell.resistance_entity ? `data-entity="${cell.resistance_entity}"` : ''}>${resStr}</span>`;
+                    }
+
+                    cellListHtml[colIdx].push(`<div class="cell-text-row clickable" data-entity="${cell.entity}"><span><span class="cell-num">${String(i+1).padStart(2,'0')}.</span><span class="cell-v">${val.toFixed(3)} V</span></span>${resHtml}${balHtml}</div>`);
                 }
             });
             listContainer.innerHTML = `<div class="cell-list-col">${cellListHtml[0].join('')}</div><div class="cell-list-col">${cellListHtml[1].join('')}</div>`;
