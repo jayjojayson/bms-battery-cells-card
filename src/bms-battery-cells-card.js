@@ -102,6 +102,26 @@ class BmsBatteryCellsCardEditor extends LitElement {
         font: inherit; font-weight: 500; cursor: pointer;
       }
       .add-button:hover { background: rgba(var(--rgb-primary-color, 33,150,243), 0.08); }
+
+      /* Farbauswahl (native Farbpalette, im Stil eines HA-Eingabefelds) */
+      .color-field {
+        display: flex; flex-direction: column; justify-content: center; gap: 2px;
+        min-height: 56px; box-sizing: border-box; padding: 6px 12px; cursor: pointer;
+        background: var(--mdc-text-field-fill-color, var(--secondary-background-color, rgba(0,0,0,0.05)));
+        border-bottom: 1px solid var(--mdc-text-field-idle-line-color, var(--secondary-text-color));
+        border-radius: 4px 4px 0 0;
+      }
+      .color-label { font-size: 12px; color: var(--secondary-text-color); }
+      .color-row { display: flex; align-items: center; gap: 10px; color: var(--primary-text-color); }
+      .color-hex { font-family: monospace; font-size: 14px; }
+      input[type="color"] {
+        -webkit-appearance: none; appearance: none;
+        width: 32px; height: 26px; padding: 0; border: none; background: none; cursor: pointer; flex-shrink: 0;
+      }
+      input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+      input[type="color"]::-webkit-color-swatch { border: 1px solid var(--divider-color); border-radius: 6px; }
+      input[type="color"]::-moz-color-swatch { border: 1px solid var(--divider-color); border-radius: 6px; }
+      .swatch-btn { width: 36px; height: 36px; }
     `;
   }
 
@@ -195,6 +215,49 @@ class BmsBatteryCellsCardEditor extends LitElement {
     `;
   }
 
+  // Beliebigen CSS-Farbwert (Hex, Name, rgb()) in #rrggbb umwandeln; null wenn keine Farbe
+  _toHexColor(value) {
+    if (!value || typeof value !== 'string') return null;
+    const v = value.trim();
+    if (/^#[0-9a-f]{6}$/i.test(v)) return v.toLowerCase();
+    if (/^#[0-9a-f]{3}$/i.test(v)) return '#' + v.slice(1).split('').map(ch => ch + ch).join('').toLowerCase();
+    try {
+      const ctx = (this._colorCtx = this._colorCtx || document.createElement('canvas').getContext('2d'));
+      ctx.fillStyle = '#000000'; ctx.fillStyle = v;
+      const res = ctx.fillStyle;
+      if (res === '#000000' && !/^(black|#000|#000000|rgb\(0, ?0, ?0\))$/i.test(v)) return null;
+      return /^#[0-9a-f]{6}$/i.test(res) ? res : null;
+    } catch (e) { return null; }
+  }
+
+  // Farbfeld mit Farbpalette (z. B. Farben für den Delta-Modus)
+  _renderColorField(labelKey, configKey, fallback) {
+    const value = this._config[configKey] ?? fallback;
+    const hex = this._toHexColor(value) || fallback;
+    return html`
+      <label class="color-field">
+        <span class="color-label">${this._localize(labelKey)}</span>
+        <span class="color-row">
+          <input type="color" .value=${hex} @change=${(e) => this._setValue(configKey, e.target.value)}>
+          <span class="color-hex">${value}</span>
+        </span>
+      </label>
+    `;
+  }
+
+  // Auswahl (z. B. gradient / range / delta) plus Farbpalette für eine eigene, feste Farbe
+  _renderColorSelect(labelKey, configKey, options, fallback, defaultSwatch) {
+    const value = this._config[configKey] ?? fallback;
+    const hex = this._toHexColor(options.includes(value) ? '' : value) || defaultSwatch;
+    return html`
+      <div class="field-row">
+        ${this._renderSelector(labelKey, configKey, colorSelector(options), fallback)}
+        <input type="color" class="swatch-btn" title=${this._localize('editor.pick_color')} .value=${hex}
+          @change=${(e) => this._setValue(configKey, e.target.value)}>
+      </div>
+    `;
+  }
+
   _renderSwitch(labelKey, configKey, defaultValue = false, highlight = false) {
     const checked = defaultValue ? this._config[configKey] !== false : !!this._config[configKey];
     return html`
@@ -251,13 +314,13 @@ class BmsBatteryCellsCardEditor extends LitElement {
 
             <span class="sub-header">${this._localize('editor.colors')}</span>
             <div class="grid-2">
-              ${this._renderSelector('editor.cell_background_color', 'cell_background_color', colorSelector(['gradient']), 'gradient')}
+              ${this._renderColorSelect('editor.cell_background_color', 'cell_background_color', ['gradient'], 'gradient', '#1c1c1e')}
               ${this._renderSelector('editor.cell_background_opacity', 'cell_background_opacity', opacitySelector, 0.25)}
-              ${this._renderSelector('editor.cell_bar_color', 'cell_bar_color', colorSelector(['range', 'delta']), 'range')}
+              ${this._renderColorSelect('editor.cell_bar_color', 'cell_bar_color', ['range', 'delta'], 'range', '#43a047')}
               ${this._renderSelector('editor.cell_bar_opacity', 'cell_bar_opacity', opacitySelector, 0.6)}
               ${c.cell_bar_color === 'delta' ? html`
-                ${this._renderSelector('editor.cell_bar_top_color', 'cell_bar_top_color', textSelector, '#173117')}
-                ${this._renderSelector('editor.cell_bar_bottom_color', 'cell_bar_bottom_color', textSelector, '#3c2222')}
+                ${this._renderColorField('editor.cell_bar_top_color', 'cell_bar_top_color', '#173117')}
+                ${this._renderColorField('editor.cell_bar_bottom_color', 'cell_bar_bottom_color', '#3c2222')}
               ` : ''}
             </div>
           ` : ''}

@@ -30,8 +30,9 @@ export default {
         cell_background_opacity: "Hintergrund-Deckkraft",
         cell_bar_color: "Balkenfarbe",
         cell_bar_opacity: "Balken-Deckkraft",
-        cell_bar_top_color: "Farbe Max-Zelle (Hex)",
-        cell_bar_bottom_color: "Farbe Min-Zelle (Hex)",
+        cell_bar_top_color: "Farbe Max-Zelle",
+        cell_bar_bottom_color: "Farbe Min-Zelle",
+        pick_color: "Eigene Farbe wählen",
 
         // Detailansicht Optionen
         show_detailed_view: "Detailansicht aktivieren",

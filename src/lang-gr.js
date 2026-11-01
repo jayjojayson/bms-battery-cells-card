@@ -1,6 +1,5 @@
 // Ελληνικά (Greek) – PR #14 by TakissX
 // Home Assistant uses the language code "el" for Greek; the card maps both "el" and "gr" to this file.
-// Missing keys fall back to English automatically.
 export default {
     editor: {
         title: "Τίτλος Κάρτας",
@@ -33,8 +32,13 @@ export default {
         cell_background_opacity: "Αδιαφάνεια φόντου",
         cell_bar_color: "Χρώμα ράβδου",
         cell_bar_opacity: "Αδιαφάνεια ράβδου",
-        cell_bar_top_color: "Χρώμα κορυφής ράβδου (hex)",
-        cell_bar_bottom_color: "Χρώμα βάσης ράβδου (hex)",
+        cell_bar_top_color: "Χρώμα μέγιστου στοιχείου",
+        cell_bar_bottom_color: "Χρώμα ελάχιστου στοιχείου",
+        pick_color: "Επιλογή χρώματος",
+        colors: "Χρώματα",
+        show_legend: "Εμφάνιση Κλίμακας Τάσης",
+        standard_view_options: "Τυπική Προβολή (Ράβδοι)",
+        cell_resistance_entity: "Οντότητα Αντίστασης (προαιρ.)",
 
         // Επιλογές Λεπτομερούς Προβολής
         show_detailed_view: "Ενεργοποίηση Λεπτομερούς Προβολής",
@@ -47,6 +51,10 @@ export default {
         cycle_capacity: "Χωρητικότητα Κύκλου (Ah)",
         cycles: "Αριθμός Κύκλων",
         temp_mos: "Θερμοκρασία MOS",
+        show_title_in_detail: "Εμφάνιση τίτλου κάρτας",
+        show_status: "Εμφάνιση γενικής κατάστασης (φόρτιση / εκφόρτιση / εξισορρόπηση / αδράνεια)",
+        balance_led: "Εμφάνιση εξισορρόπησης ως LED αντί για κείμενο",
+        stat_heater: "Θέρμανση (Διακόπτης/Είσοδος Boolean/Επιλογή)",
 
         stat_charge: "Φόρτιση (Διακόπτης/Είσοδος Boolean/Επιλογή)",
         stat_discharge: "Εκφόρτιση (Διακόπτης/Είσοδος Boolean/Επιλογή)",
@@ -72,6 +80,12 @@ export default {
         charge: "Φόρτιση",
         discharge: "Εκφόρτιση",
         balance: "Εξισορρόπηση",
+        heater: "Θέρμανση",
+        status: "Κατάσταση",
+        status_charging: "Φόρτιση",
+        status_discharging: "Εκφόρτιση",
+        status_balancing: "Εξισορρόπηση",
+        status_idle: "Αδράνεια",
         on: "ΕΝΕΡΓΟ",
         off: "ΑΝΕΝΕΡΓΟ",
         soh: "SoH",

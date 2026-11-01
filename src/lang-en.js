@@ -30,8 +30,9 @@ export default {
         cell_background_opacity: "Background opacity",
         cell_bar_color: "Bar color",
         cell_bar_opacity: "Bar opacity",
-        cell_bar_top_color: "Color max cell (hex)",
-        cell_bar_bottom_color: "Color min cell (hex)",
+        cell_bar_top_color: "Color max cell",
+        cell_bar_bottom_color: "Color min cell",
+        pick_color: "Pick custom color",
 
         // Detailed View Options
         show_detailed_view: "Enable Detailed View",

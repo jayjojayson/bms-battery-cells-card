@@ -30,8 +30,9 @@ var de = {
         cell_background_opacity: "Hintergrund-Deckkraft",
         cell_bar_color: "Balkenfarbe",
         cell_bar_opacity: "Balken-Deckkraft",
-        cell_bar_top_color: "Farbe Max-Zelle (Hex)",
-        cell_bar_bottom_color: "Farbe Min-Zelle (Hex)",
+        cell_bar_top_color: "Farbe Max-Zelle",
+        cell_bar_bottom_color: "Farbe Min-Zelle",
+        pick_color: "Eigene Farbe wählen",
 
         // Detailansicht Optionen
         show_detailed_view: "Detailansicht aktivieren",
@@ -128,8 +129,9 @@ var en = {
         cell_background_opacity: "Background opacity",
         cell_bar_color: "Bar color",
         cell_bar_opacity: "Bar opacity",
-        cell_bar_top_color: "Color max cell (hex)",
-        cell_bar_bottom_color: "Color min cell (hex)",
+        cell_bar_top_color: "Color max cell",
+        cell_bar_bottom_color: "Color min cell",
+        pick_color: "Pick custom color",
 
         // Detailed View Options
         show_detailed_view: "Enable Detailed View",
@@ -231,12 +233,13 @@ var fr = {
     show_legend: "Afficher l’échelle de tension",
     standard_view_options: "Vue standard (barres)",
     colors: "Couleurs",
-    cell_background_color: "Fond des cellules : « gradient » ou couleur",
-    cell_background_opacity: "Opacité du fond (0.0 - 1.0)",
-    cell_bar_color: "Couleur des barres (« range », « delta » ou couleur)",
-    cell_bar_opacity: "Opacité des barres (0.0 - 1.0)",
-    cell_bar_top_color: "Couleur haute (hex, mode delta)",
-    cell_bar_bottom_color: "Couleur basse (hex, mode delta)",
+    cell_background_color: "Fond des cellules",
+    cell_background_opacity: "Opacité du fond",
+    cell_bar_color: "Couleur des barres",
+    cell_bar_opacity: "Opacité des barres",
+    cell_bar_top_color: "Couleur cellule max",
+    cell_bar_bottom_color: "Couleur cellule min",
+    pick_color: "Choisir une couleur",
     detailed_sensors: "Capteurs de la vue détaillée (optionnel)",
     soh: "SoH (État de santé %)",
     capacity: "Capacité (Ah)",
@@ -296,7 +299,6 @@ var fr = {
 
 // Ελληνικά (Greek) – PR #14 by TakissX
 // Home Assistant uses the language code "el" for Greek; the card maps both "el" and "gr" to this file.
-// Missing keys fall back to English automatically.
 var gr = {
     editor: {
         title: "Τίτλος Κάρτας",
@@ -329,8 +331,13 @@ var gr = {
         cell_background_opacity: "Αδιαφάνεια φόντου",
         cell_bar_color: "Χρώμα ράβδου",
         cell_bar_opacity: "Αδιαφάνεια ράβδου",
-        cell_bar_top_color: "Χρώμα κορυφής ράβδου (hex)",
-        cell_bar_bottom_color: "Χρώμα βάσης ράβδου (hex)",
+        cell_bar_top_color: "Χρώμα μέγιστου στοιχείου",
+        cell_bar_bottom_color: "Χρώμα ελάχιστου στοιχείου",
+        pick_color: "Επιλογή χρώματος",
+        colors: "Χρώματα",
+        show_legend: "Εμφάνιση Κλίμακας Τάσης",
+        standard_view_options: "Τυπική Προβολή (Ράβδοι)",
+        cell_resistance_entity: "Οντότητα Αντίστασης (προαιρ.)",
 
         // Επιλογές Λεπτομερούς Προβολής
         show_detailed_view: "Ενεργοποίηση Λεπτομερούς Προβολής",
@@ -343,6 +350,10 @@ var gr = {
         cycle_capacity: "Χωρητικότητα Κύκλου (Ah)",
         cycles: "Αριθμός Κύκλων",
         temp_mos: "Θερμοκρασία MOS",
+        show_title_in_detail: "Εμφάνιση τίτλου κάρτας",
+        show_status: "Εμφάνιση γενικής κατάστασης (φόρτιση / εκφόρτιση / εξισορρόπηση / αδράνεια)",
+        balance_led: "Εμφάνιση εξισορρόπησης ως LED αντί για κείμενο",
+        stat_heater: "Θέρμανση (Διακόπτης/Είσοδος Boolean/Επιλογή)",
 
         stat_charge: "Φόρτιση (Διακόπτης/Είσοδος Boolean/Επιλογή)",
         stat_discharge: "Εκφόρτιση (Διακόπτης/Είσοδος Boolean/Επιλογή)",
@@ -368,6 +379,12 @@ var gr = {
         charge: "Φόρτιση",
         discharge: "Εκφόρτιση",
         balance: "Εξισορρόπηση",
+        heater: "Θέρμανση",
+        status: "Κατάσταση",
+        status_charging: "Φόρτιση",
+        status_discharging: "Εκφόρτιση",
+        status_balancing: "Εξισορρόπηση",
+        status_idle: "Αδράνεια",
         on: "ΕΝΕΡΓΟ",
         off: "ΑΝΕΝΕΡΓΟ",
         soh: "SoH",
@@ -509,6 +526,26 @@ class BmsBatteryCellsCardEditor extends LitElement {
         font: inherit; font-weight: 500; cursor: pointer;
       }
       .add-button:hover { background: rgba(var(--rgb-primary-color, 33,150,243), 0.08); }
+
+      /* Farbauswahl (native Farbpalette, im Stil eines HA-Eingabefelds) */
+      .color-field {
+        display: flex; flex-direction: column; justify-content: center; gap: 2px;
+        min-height: 56px; box-sizing: border-box; padding: 6px 12px; cursor: pointer;
+        background: var(--mdc-text-field-fill-color, var(--secondary-background-color, rgba(0,0,0,0.05)));
+        border-bottom: 1px solid var(--mdc-text-field-idle-line-color, var(--secondary-text-color));
+        border-radius: 4px 4px 0 0;
+      }
+      .color-label { font-size: 12px; color: var(--secondary-text-color); }
+      .color-row { display: flex; align-items: center; gap: 10px; color: var(--primary-text-color); }
+      .color-hex { font-family: monospace; font-size: 14px; }
+      input[type="color"] {
+        -webkit-appearance: none; appearance: none;
+        width: 32px; height: 26px; padding: 0; border: none; background: none; cursor: pointer; flex-shrink: 0;
+      }
+      input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+      input[type="color"]::-webkit-color-swatch { border: 1px solid var(--divider-color); border-radius: 6px; }
+      input[type="color"]::-moz-color-swatch { border: 1px solid var(--divider-color); border-radius: 6px; }
+      .swatch-btn { width: 36px; height: 36px; }
     `;
   }
 
@@ -602,6 +639,49 @@ class BmsBatteryCellsCardEditor extends LitElement {
     `;
   }
 
+  // Beliebigen CSS-Farbwert (Hex, Name, rgb()) in #rrggbb umwandeln; null wenn keine Farbe
+  _toHexColor(value) {
+    if (!value || typeof value !== 'string') return null;
+    const v = value.trim();
+    if (/^#[0-9a-f]{6}$/i.test(v)) return v.toLowerCase();
+    if (/^#[0-9a-f]{3}$/i.test(v)) return '#' + v.slice(1).split('').map(ch => ch + ch).join('').toLowerCase();
+    try {
+      const ctx = (this._colorCtx = this._colorCtx || document.createElement('canvas').getContext('2d'));
+      ctx.fillStyle = '#000000'; ctx.fillStyle = v;
+      const res = ctx.fillStyle;
+      if (res === '#000000' && !/^(black|#000|#000000|rgb\(0, ?0, ?0\))$/i.test(v)) return null;
+      return /^#[0-9a-f]{6}$/i.test(res) ? res : null;
+    } catch (e) { return null; }
+  }
+
+  // Farbfeld mit Farbpalette (z. B. Farben für den Delta-Modus)
+  _renderColorField(labelKey, configKey, fallback) {
+    const value = this._config[configKey] ?? fallback;
+    const hex = this._toHexColor(value) || fallback;
+    return html`
+      <label class="color-field">
+        <span class="color-label">${this._localize(labelKey)}</span>
+        <span class="color-row">
+          <input type="color" .value=${hex} @change=${(e) => this._setValue(configKey, e.target.value)}>
+          <span class="color-hex">${value}</span>
+        </span>
+      </label>
+    `;
+  }
+
+  // Auswahl (z. B. gradient / range / delta) plus Farbpalette für eine eigene, feste Farbe
+  _renderColorSelect(labelKey, configKey, options, fallback, defaultSwatch) {
+    const value = this._config[configKey] ?? fallback;
+    const hex = this._toHexColor(options.includes(value) ? '' : value) || defaultSwatch;
+    return html`
+      <div class="field-row">
+        ${this._renderSelector(labelKey, configKey, colorSelector(options), fallback)}
+        <input type="color" class="swatch-btn" title=${this._localize('editor.pick_color')} .value=${hex}
+          @change=${(e) => this._setValue(configKey, e.target.value)}>
+      </div>
+    `;
+  }
+
   _renderSwitch(labelKey, configKey, defaultValue = false, highlight = false) {
     const checked = defaultValue ? this._config[configKey] !== false : !!this._config[configKey];
     return html`
@@ -658,13 +738,13 @@ class BmsBatteryCellsCardEditor extends LitElement {
 
             <span class="sub-header">${this._localize('editor.colors')}</span>
             <div class="grid-2">
-              ${this._renderSelector('editor.cell_background_color', 'cell_background_color', colorSelector(['gradient']), 'gradient')}
+              ${this._renderColorSelect('editor.cell_background_color', 'cell_background_color', ['gradient'], 'gradient', '#1c1c1e')}
               ${this._renderSelector('editor.cell_background_opacity', 'cell_background_opacity', opacitySelector, 0.25)}
-              ${this._renderSelector('editor.cell_bar_color', 'cell_bar_color', colorSelector(['range', 'delta']), 'range')}
+              ${this._renderColorSelect('editor.cell_bar_color', 'cell_bar_color', ['range', 'delta'], 'range', '#43a047')}
               ${this._renderSelector('editor.cell_bar_opacity', 'cell_bar_opacity', opacitySelector, 0.6)}
               ${c.cell_bar_color === 'delta' ? html`
-                ${this._renderSelector('editor.cell_bar_top_color', 'cell_bar_top_color', textSelector, '#173117')}
-                ${this._renderSelector('editor.cell_bar_bottom_color', 'cell_bar_bottom_color', textSelector, '#3c2222')}
+                ${this._renderColorField('editor.cell_bar_top_color', 'cell_bar_top_color', '#173117')}
+                ${this._renderColorField('editor.cell_bar_bottom_color', 'cell_bar_bottom_color', '#3c2222')}
               ` : ''}
             </div>
           ` : ''}
