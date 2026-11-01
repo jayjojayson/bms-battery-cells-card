@@ -1518,7 +1518,7 @@ class BmsBatteryCellsCard extends HTMLElement {
         const deltaClass = deltaEnt ? 'detail-item clickable' : 'detail-item';
         rightList.push(`<div class="${deltaClass}" data-entity="${deltaEnt}"><span class="detail-label">${this._localize('card.delta_cell_vol')} :</span><span class="detail-val-txt">${deltaStr}</span></div>`);
         
-        addIfConf(rightList, 'temp_mos_entity', 'card.mos_temp', '°C', true);
+        addIfConf(rightList, 'temp_mos_entity', 'card.mos_temp', '°C', true, 1); // PR #13 (evilstan): 1 Nachkommastelle
 
         const leftEl = this.shadowRoot.getElementById('d-list-left');
         const rightEl = this.shadowRoot.getElementById('d-list-right');
