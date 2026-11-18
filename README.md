@@ -16,7 +16,7 @@ The card can be fully configured via the card editor user interface.
 You need the corresponding entities from your BMS (e.g. Victron, JK-BMS, Daly, Seplos, JBD) that provide the cell voltages in Home Assistant.
 Regular batteries (AGM and similar with 12, 24v or 48v) also work, as long as you have suitable entities available in Home Assistant.
 
-Supported card languages are English, German, French and Greek. If you need other languages as well, tell me.
+Supported card languages are English, German, French, Greek and Spanish. If you need other languages as well, tell me.
 
 If you like this custom card, I would really appreciate a star rating ⭐. Thanks 🤗
 

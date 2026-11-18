@@ -1,5 +1,6 @@
 import de from './lang-de.js';
 import en from './lang-en.js';
+import es from './lang-es.js';
 import fr from './lang-fr.js';
 import gr from './lang-gr.js';
 import './chart.umd.min.js';
@@ -27,7 +28,7 @@ const CUSTOM_STATE_DOMAINS = ["select", "input_select"];
 
 // Lokalisierung mit Fallback auf Englisch pro Schlüssel (verhindert rohe Keys wie "card.delta")
 // Griechisch: HA meldet "el", PR #14 nutzte "gr" -> beide Codes
-const LANGS = { de, en, fr, el: gr, gr };
+const LANGS = { de, en, es, fr, el: gr, gr };
 const localize = (hass, key) => {
   const code = (hass?.locale?.language || 'en').split('-')[0];
   const lookup = (dict) => key.split('.').reduce((o, i) => (o ? o[i] : undefined), dict);
